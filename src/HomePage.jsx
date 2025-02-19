@@ -59,7 +59,7 @@ const HomePage = () => {
                 </div>
             </div>
 
-            {/* Footer Section */}
+            Footer Section
             <footer className="py-8 px-4 bg-gray-800">
                 <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
                     <div className="mb-4 md:mb-0">
