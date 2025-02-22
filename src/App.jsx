@@ -1,24 +1,14 @@
-// import { useState } from 'react'
-// import reactLogo from './assets/react.svg'
-// import viteLogo from '/vite.svg'
-// import './App.css'
-// import LoginPage from './Authentication/Login.jsx'
-// import RegisterPage from './Authentication/Register.jsx'
+
 import { TablePagination } from '@mui/material'
 import HomePage from './HomePage.jsx'
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Footer from './Authentication/Footer.jsx'
 import Navbar from './Navbar.jsx';
-import Login from './Authentication/Login.jsx'
-import LoginPage from './Authentication/Login.jsx';
-import Testimonial from './Testimonial.jsx';
-import RegisterPage from './Authentication/Register.jsx';
 import UserRoutes from './routes/UserRoutes.jsx';
+import Leaderboard from './pages/Leaderboard.jsx';
 
 
-const Classes = () => <h1>Classes Page</h1>;
-const About = () => <h1>About Us</h1>;
-const Contact = () => <h1>Contact Page</h1>;
+
 
 function App() {
 
@@ -27,6 +17,7 @@ function App() {
     // <HomePage />
     <Router>
       <Navbar />
+
 
       <UserRoutes></UserRoutes>
       <Footer />
