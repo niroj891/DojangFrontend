@@ -1,6 +1,8 @@
-import Link from "react-router";
-import { Facebook, Twitter, Instagram } from "@mui/icons-material"
+import React from "react";
+//import { FaFacebook, FaTwitter, FaInstagram } from "react-icons/fa"; 
 
+import { Facebook, Twitter, Instagram } from '@mui/icons-material';
+import { Link } from "react-router-dom";
 export default function Footer() {
     return (
         <footer className="bg-gray-800 text-white py-8">
@@ -14,32 +16,32 @@ export default function Footer() {
                         <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
                         <ul className="space-y-2">
                             <li>
-                                <Link href="/classes" className="hover:text-gray-300">
+                                <Link to="/classes" className="hover:text-gray-300">
                                     Classes
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/about" className="hover:text-gray-300">
+                                <Link to="/about" className="hover:text-gray-300">
                                     About Us
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/contact" className="hover:text-gray-300">
+                                <Link to="/contact" className="hover:text-gray-300">
                                     Contact
                                 </Link>
                             </li>
                         </ul>
                     </div>
-                    <div>
-                        <h4 className="text-lg font-semibold mb-4">Connect With Us</h4>
-                        <div className="flex space-x-4">
-                            <a href="#" className="hover:text-gray-300">
+                    <div >
+                        <h4 className="flex justify-center text-lg underline-offset-4 font-semibold mb-4">Connect With Us</h4>
+                        <div className="space-y-4">
+                            <a href="#" className="flex justify-center hover:text-gray-300">
                                 <Facebook />
                             </a>
-                            <a href="#" className="hover:text-gray-300">
+                            <a href="#" className="flex justify-center hover:text-gray-300">
                                 <Twitter />
                             </a>
-                            <a href="#" className="hover:text-gray-300">
+                            <a href="#" className="flex justify-center hover:text-gray-300">
                                 <Instagram />
                             </a>
                         </div>
@@ -52,4 +54,6 @@ export default function Footer() {
         </footer>
     )
 }
+
+
 
