@@ -4,31 +4,47 @@ import { LocationOn, Event, People, Search } from "@mui/icons-material";
 
 const events = [
     {
-        title: "Slovenia Open 2025 - World Taekwondo - G-1",
-        location: "Ljubljana, Slovenia",
+        title: "Bagmati Aanchal tournament - G-1",
+        location: "Rangashala",
         date: "22 Feb - 23 Feb 2025",
         attendees: 1095,
         deadline: "11 Feb 04:44 am",
-        image: "slovenia_open.jpg",
+        image: "NepalTaekwondo_open.jpg",
     },
     {
-        title: "(Kyorugi) Bulgaria Open 2025 - World Taekwondo - G-1",
-        location: "Sofia, Bulgaria",
+        title: "(Kyorugi) Nepal open tournament National - G-1",
+        location: "Rastriya kavard hall rangashala",
         date: "1 Mar - 2 Mar 2025",
         attendees: 1173,
         deadline: "18 Feb 03:44 am",
-        image: "bulgaria_open.jpg",
+        image: "Kavardhall_open.jpg",
     },
     {
-        title: "(Poomsae) Bulgaria Open 2025 - World Taekwondo - G-1",
-        location: "Sofia, Bulgaria",
+        title: "(Poomsae) 2nd Sagarmatha open taekwodno championship - G-1",
+        location: "Satdobato",
         date: "3 Mar 2025",
         attendees: 354,
         deadline: "22 Feb 03:44 am",
         image: "bulgaria_poomsae.jpg",
     },
     {
-        title: "52nd Dutch Open Taekwondo Championships 2025 - G-2",
+        title: "Kathnamdu uptyaka taekwondo championship - G-2",
+        location: "Mulpani, Mulpani taekwondo dojang",
+        date: "8 Mar - 9 Mar 2025",
+        attendees: 1803,
+        deadline: "Closed",
+        image: "dutch_open.jpg",
+    },
+    {
+        title: "5th Kathmandu open taekwondo championship - G-2",
+        location: "Bafal kathmandu",
+        date: "8 Mar - 9 Mar 2025",
+        attendees: 1803,
+        deadline: "Closed",
+        image: "dutch_open.jpg",
+    },
+    {
+        title: "3rd Korean ambassador international taekwondo championship - G-2",
         location: "Eindhoven, Netherlands",
         date: "8 Mar - 9 Mar 2025",
         attendees: 1803,
@@ -78,7 +94,7 @@ const EventCard = ({ event }) => (
 );
 
 const Sidebar = () => (
-    <div className="w-64 p-4 bg-gray-100 h-screen">
+    <div className="w-100 p-4 bg-gray-200 h-screen">
         <TextField fullWidth variant="outlined" placeholder="Search events" InputProps={{ startAdornment: <Search /> }} />
         <List className="mt-4">
             <ListItem button selected>

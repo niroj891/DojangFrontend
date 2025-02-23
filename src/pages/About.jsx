@@ -46,6 +46,26 @@ export default function About() {
                     experienced instructors, tournament champions, and dedicated enthusiasts committed to making this platform a success.
                 </p>
             </div>
+            <div className="grid md:grid-cols-3 gap-8 mt-12">
+                <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-4">8th Dan Grand Master</h2>
+                    <p className="text-gray-700">
+                        Connect with top martial artists, improve your skills, and stay updated on the latest events and trends in the martial arts world.
+                    </p>
+                </div>
+                <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-4">7th Dan Grand Master</h2>
+                    <p className="text-gray-700">
+                        Connect with top martial artists, improve your skills, and stay updated on the latest events and trends in the martial arts world.
+                    </p>
+                </div>
+                <div className="bg-white p-6 rounded-2xl shadow-lg flex flex-col items-center text-center">
+                    <h2 className="text-2xl font-semibold text-gray-900 mb-4">3rd Dan Taekwondo Black belt</h2>
+                    <p className="text-gray-700">
+                        Connect with top martial artists, improve your skills, and stay updated on the latest events and trends in the martial arts world.
+                    </p>
+                </div>
+            </div>
 
             <div className="text-center mt-12">
                 <h2 className="text-3xl font-semibold text-gray-900">Be Part of the Dojang Community</h2>

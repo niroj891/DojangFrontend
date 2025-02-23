@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 //import { AppBar, Toolbar, IconButton, Drawer, List, ListItem, ListItemText, Button } from "@mui/material";
 import { Menu } from "@mui/icons-material";
 
-const navItems = ["Home", "Events", "About", "Community", "Leaderbaord", "Contact"];
+const navItems = ["Home", "Events", "About", "Leaderboard", "Community", "Contact"];
 
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);

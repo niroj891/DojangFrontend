@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Footer from './Authentication/Footer.jsx'
 import Navbar from './Navbar.jsx';
 import UserRoutes from './routes/UserRoutes.jsx';
-import Leaderboard from './pages/Leaderboard.jsx';
+
 
 
 
@@ -14,10 +14,8 @@ function App() {
 
 
   return (
-    // <HomePage />
     <Router>
       <Navbar />
-
 
       <UserRoutes></UserRoutes>
       <Footer />

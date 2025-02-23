@@ -9,8 +9,24 @@ export default function Footer() {
             <div className="container mx-auto px-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     <div>
-                        <h3 className="text-xl font-bold mb-4">TaekwondoMaster</h3>
-                        <p className="text-sm">Empowering lives through the art of Taekwondo</p>
+                        <h4 className="text-lg font-semibold mb-4">Taekwondo Nepal</h4>
+                        <ul className="space-y-2">
+                            <li>
+                                <Link to="/classes" className="hover:text-gray-300">
+                                    History
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/about" className="hover:text-gray-300">
+                                    Rules and Regulations
+                                </Link>
+                            </li>
+                            <li>
+                                <Link to="/contact" className="hover:text-gray-300">
+                                    News
+                                </Link>
+                            </li>
+                        </ul>
                     </div>
                     <div>
                         <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
@@ -32,6 +48,8 @@ export default function Footer() {
                             </li>
                         </ul>
                     </div>
+
+
                     <div >
                         <h4 className="flex justify-center text-lg underline-offset-4 font-semibold mb-4">Connect With Us</h4>
                         <div className="space-y-4">
@@ -48,7 +66,7 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className="mt-8 text-center text-sm">
-                    © {new Date().getFullYear()} TaekwondoMaster. All rights reserved.
+                    © {new Date().getFullYear()} Dojang. All rights reserved.
                 </div>
             </div>
         </footer>

@@ -1,5 +1,6 @@
 import React from 'react';
 import Testimonial from './Testimonial';
+import UpcomingEvents from './pages/UpcomingEvents';
 
 const HomePage = () => {
     return (
@@ -68,6 +69,10 @@ const HomePage = () => {
                         ))}
                     </div>
                 </div>
+            </div>
+            <div>
+                <UpcomingEvents />
+
             </div>
 
             {/* Testimonials Section */}
