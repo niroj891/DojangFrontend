@@ -20,7 +20,7 @@ export default function Navbar() {
                     <img
                         src="/image/Taekwondo logo.png"
                         alt="Dojang Logo"
-                        className="w-12 h-12 object-contain"
+                        className="w-12 h-12 object-contain rounded-full"
                     />
                     <span className="italic">Dojang</span>
                 </Link>

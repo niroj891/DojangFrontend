@@ -6,28 +6,28 @@ import "slick-carousel/slick/slick-theme.css";
 
 const upcomingEvents = [
     {
-        title: "Slovenia Open 2025 - G1",
+        title: "5th Everest International Taekwondo Championship",
         date: "22 Feb - 23 Feb 2025",
-        location: "Ljubljana, Slovenia",
-        image: "slovenia_open.jpg",
+        location: "Rastriya kavard Hall",
+        image: "/image/Champ.jpg",
     },
     {
-        title: "(Kyorugi) Bulgaria Open 2025 - G1",
+        title: "1st Indo Nepal International Taekwondo Championship",
         date: "1 Mar - 2 Mar 2025",
-        location: "Sofia, Bulgaria",
-        image: "bulgaria_open.jpg",
+        location: "Mulpani",
+        image: "/image/Taekwondo-Chapionships.jpg",
     },
     {
-        title: "(Poomsae) Bulgaria Open 2025 - G1",
+        title: "3rd Mount Everest Taekwondo Championship",
         date: "3 Mar 2025",
-        location: "Sofia, Bulgaria",
-        image: "bulgaria_poomsae.jpg",
+        location: "Koteshor",
+        image: "/image/IntChamp.jpg",
     },
     {
-        title: "52nd Dutch Open Taekwondo Championships - G2",
+        title: "10th Kathmandu Taekwondo Championships - G2",
         date: "8 Mar - 9 Mar 2025",
-        location: "Eindhoven, Netherlands",
-        image: "dutch_open.jpg",
+        location: "Kathmandu",
+        image: "/image/IndoNepalChamp.jpg",
     },
 ];
 

@@ -62,11 +62,11 @@ import React from "react";
 import { Avatar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
 
 const players = [
-    { rank: 1, name: "Tae-Joon PARK", id: "KOR-5579", dojang: "Kathmandu Taekwondo dojang", flag: "🇰🇷", points: 200.0, image: "https://randomuser.me/api/portraits/men/1.jpg" },
-    { rank: 2, name: "Gashim MAGOMEDOV", id: "AZE-1988", dojang: "Koteshor Taekwondo dojang", flag: "🇦🇿", points: 120.0, image: "https://randomuser.me/api/portraits/men/2.jpg" },
-    { rank: 3, name: "Mohamed Khalil JENDOUBI", id: "TUN-1731", dojang: "Rastriya Taekwondo dojang", flag: "🇹🇳", points: 72.0, image: "https://randomuser.me/api/portraits/men/3.jpg" },
-    { rank: 3, name: "Cyrian RAVET", id: "FRA-1865", dojang: "Dhalko Taekwondo Dojang", flag: "🇫🇷", points: 72.0, image: "https://randomuser.me/api/portraits/men/4.jpg" },
-    { rank: 5, name: "Vito DELL'AQUILA", id: "ITA-2116", dojang: "Syuchatar Taekwondo Dojang", flag: "🇮🇹", points: 43.2, image: "https://randomuser.me/api/portraits/men/5.jpg" },
+    { rank: 1, name: "Jeewan Shakya", id: "KOR-5579", dojang: "Kathmandu Taekwondo dojang", flag: "🇰🇷", points: 200.0, image: "https://randomuser.me/api/portraits/men/1.jpg" },
+    { rank: 2, name: "Ram Limbu", id: "AZE-1988", dojang: "Koteshor Taekwondo dojang", flag: "🇦🇿", points: 120.0, image: "https://randomuser.me/api/portraits/men/2.jpg" },
+    { rank: 3, name: "Ramesh Shrestha", id: "TUN-1731", dojang: "Rastriya Taekwondo dojang", flag: "🇹🇳", points: 72.0, image: "https://randomuser.me/api/portraits/men/3.jpg" },
+    { rank: 3, name: "Prasanga bhandari", id: "FRA-1865", dojang: "Dhalko Taekwondo Dojang", flag: "🇫🇷", points: 72.0, image: "https://randomuser.me/api/portraits/men/4.jpg" },
+    { rank: 5, name: "Danny Rai", id: "ITA-2116", dojang: "Syuchatar Taekwondo Dojang", flag: "🇮🇹", points: 43.2, image: "https://randomuser.me/api/portraits/men/5.jpg" },
     { rank: 5, name: "Adrian VICENTE YUNTA", id: "ESP-2994", dojang: "Chitwan Taekwondo Dojang", flag: "🇪🇸", points: 43.2, image: "https://randomuser.me/api/portraits/men/6.jpg" },
     { rank: 7, name: "Jack WOOLLEY", id: "IRL-1542", dojang: "Bagmati Taekwondo Dojang", flag: "🇮🇪", points: 41.42, image: "https://randomuser.me/api/portraits/men/7.jpg" },
     { rank: 8, name: "Sina MOHTARAMI", id: "IRI-24088", dojang: "Bhaktapur Taekwondo Dojang", flag: "🇮🇷", points: 40.0, image: "https://randomuser.me/api/portraits/men/8.jpg" },

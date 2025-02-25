@@ -19,7 +19,7 @@ export default function Testimonial() {
                         <blockquote className="text-xl italic mb-4">
                             "This platform has helped my students push their limits and achieve their goals faster than before!"
                         </blockquote>
-                        <p className="text-lg font-bold">– John Smith, 5th Dan Black Belt</p>
+                        <p className="text-lg font-bold">– Asayesha Shakya, 5th Dan Black Belt</p>
                     </div>
 
                     {/* Card 2 */}
@@ -32,7 +32,7 @@ export default function Testimonial() {
                         <blockquote className="text-xl italic mb-4">
                             "This platform makes training more interactive and keeps me connected with my students all over the world."
                         </blockquote>
-                        <p className="text-lg font-bold">– Sarah Lee, 3rd Dan Black Belt</p>
+                        <p className="text-lg font-bold">– Kumar Gurung, 3rd Dan Black Belt</p>
                     </div>
 
                     {/* Card 3 */}
@@ -45,7 +45,7 @@ export default function Testimonial() {
                         <blockquote className="text-xl italic mb-4">
                             "The personalized training plans and progress tracking have truly made a difference for my students."
                         </blockquote>
-                        <p className="text-lg font-bold">– Mark Taylor, 4th Dan Black Belt</p>
+                        <p className="text-lg font-bold">– Deepak Bista, 4th Dan Black Belt</p>
                     </div>
                 </div>
 
@@ -54,7 +54,7 @@ export default function Testimonial() {
                     <blockquote className="text-2xl italic mb-4">
                         "This platform has transformed my Taekwondo journey. I’ve connected with amazing people and improved my skills faster than ever!"
                     </blockquote>
-                    <p className="text-xl font-bold">– Jane Doe, 2nd Dan Black Belt</p>
+                    <p className="text-xl font-bold">– Deep Raj Gurung, GrandMaster 8th Dan Black Belt</p>
                 </div>
             </div>
         </div>

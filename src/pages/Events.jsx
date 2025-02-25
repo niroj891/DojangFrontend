@@ -9,7 +9,7 @@ const events = [
         date: "22 Feb - 23 Feb 2025",
         attendees: 1095,
         deadline: "11 Feb 04:44 am",
-        image: "NepalTaekwondo_open.jpg",
+        image: "/image/IndoNepalChamp.jpg",
     },
     {
         title: "(Kyorugi) Nepal open tournament National - G-1",
@@ -17,7 +17,7 @@ const events = [
         date: "1 Mar - 2 Mar 2025",
         attendees: 1173,
         deadline: "18 Feb 03:44 am",
-        image: "Kavardhall_open.jpg",
+        image: "/image/IntChamp.jpg",
     },
     {
         title: "(Poomsae) 2nd Sagarmatha open taekwodno championship - G-1",
@@ -25,7 +25,7 @@ const events = [
         date: "3 Mar 2025",
         attendees: 354,
         deadline: "22 Feb 03:44 am",
-        image: "bulgaria_poomsae.jpg",
+        image: "/image/Champ.jpg",
     },
     {
         title: "Kathnamdu uptyaka taekwondo championship - G-2",
@@ -33,15 +33,15 @@ const events = [
         date: "8 Mar - 9 Mar 2025",
         attendees: 1803,
         deadline: "Closed",
-        image: "dutch_open.jpg",
+        image: "/image/Taekwondo-Chapionships.jpg",
     },
     {
-        title: "5th Kathmandu open taekwondo championship - G-2",
-        location: "Bafal kathmandu",
+        title: "World taekwondo championship - G-2",
+        location: "South korea, Seoul",
         date: "8 Mar - 9 Mar 2025",
         attendees: 1803,
         deadline: "Closed",
-        image: "dutch_open.jpg",
+        image: "/image/WorldChampionship.jpg",
     },
     {
         title: "3rd Korean ambassador international taekwondo championship - G-2",
@@ -49,13 +49,13 @@ const events = [
         date: "8 Mar - 9 Mar 2025",
         attendees: 1803,
         deadline: "Closed",
-        image: "dutch_open.jpg",
+        image: "/image/NepalInternational.jpg",
     },
 ];
 
 const EventCard = ({ event }) => (
     <Card className="w-80 shadow-lg rounded-lg">
-        <CardMedia component="img" height="140" image={event.image} alt={event.title} />
+        <CardMedia component="img" image={event.image} alt={event.title} sx={{ height: 250, objectFit: "cover", borderRadius: "10px" }} />
         <CardContent>
             <Typography variant="h6" className="font-bold">
                 {event.title}
@@ -93,10 +93,16 @@ const EventCard = ({ event }) => (
     </Card>
 );
 
+
 const Sidebar = () => (
-    <div className="w-100 p-4 bg-gray-200 h-screen">
-        <TextField fullWidth variant="outlined" placeholder="Search events" InputProps={{ startAdornment: <Search /> }} />
-        <List className="mt-4">
+    <div className="w-72 min-h-screen p-6 bg-gray-200 flex flex-col">
+        <TextField
+            fullWidth
+            variant="outlined"
+            placeholder="Search events"
+            InputProps={{ startAdornment: <Search /> }}
+        />
+        <List className="mt-4 flex-grow">
             <ListItem button selected>
                 <ListItemText primary="All" />
             </ListItem>
@@ -115,6 +121,7 @@ const Sidebar = () => (
         </List>
     </div>
 );
+
 
 const Events = () => {
     return (
