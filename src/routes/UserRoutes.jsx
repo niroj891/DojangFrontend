@@ -8,6 +8,7 @@ import Events from "../pages/Events";
 import LoginPage from "../Authentication/Login";
 import Leaderboard from "../pages/Leaderboard";
 import Community from "../pages/Community";
+import UserLayout from "../Layout";
 
 
 
@@ -20,17 +21,19 @@ import Community from "../pages/Community";
 function UserRoutes() {
     return (
         <Routes>
-            <Route path="/home" element={<HomePage ></HomePage>} />
-            <Route path="/classes" element={<Classes />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path='/login' element={<LoginPage />} />
-            <Route path='/events' element={<Events />} />
-            <Route path="/community" element={<Community />} />
 
-
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/" element={<UserLayout></UserLayout>}>
+                <Route index element={<HomePage></HomePage>}></Route>
+                <Route path="home" element={<HomePage ></HomePage>} />
+                <Route path="classes" element={<Classes />} />
+                <Route path="about" element={<About />} />
+                <Route path="contact" element={<Contact />} />
+                <Route path="leaderboard" element={<Leaderboard />} />
+                <Route path='login' element={<LoginPage />} />
+                <Route path='events' element={<Events />} />
+                <Route path="community" element={<Community />} />
+                <Route path="register" element={<RegisterPage />} />
+            </Route>
 
 
         </Routes>

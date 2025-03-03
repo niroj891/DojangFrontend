@@ -21,15 +21,19 @@ const HomePage = () => {
                     {/* Buttons */}
                     <div className="mt-6 flex flex-col sm:flex-row justify-center gap-4">
                         <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                            UPCOMING EVENTS
+                            <a href="/events">UPCOMING EVENTS</a>
                         </button>
                         <button className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg flex items-center gap-2 transition duration-300">
-                            JOIN DOJANG
+                            <a href="/register">JOIN DOJANG</a>
                             <span>🔗</span>
                         </button>
                     </div>
                 </div>
             </div>
+
+
+
+
 
             {/* Features Section */}
             <div className="py-20 px-4 bg-slate-100">
