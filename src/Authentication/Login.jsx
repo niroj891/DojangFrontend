@@ -1,32 +1,41 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { TextField, Button, Typography, Box, Paper, Divider } from "@mui/material";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL } from "../config/api.js";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux"
+import { loginUser } from "../Redux/Auth/auth.action";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as Yup from "yup";
+
+
+const validationSchema = Yup.object().shape({
+
+    email: Yup.string().email("Invalid email").required("Email is required"),
+    password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is required"),
+});
+
 
 const LoginPage = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    // const [email, setEmail] = useState("");
+    // const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const handleLogin = async (e) => {
-        e.preventDefault();
-        setError("");
-
-        try {
-            const response = await axios.post(`${API_BASE_URL}/auth/signin`, {
-                email,
-                password,
-            });
-
-            localStorage.setItem("token", response.data.token);
-            console.log("Login successful:", response.data.message);
-            navigate("/home");
-        } catch (err) {
-            setError(err.response?.data?.message || "Login failed. Try again.");
-        }
+    const initialValues = {
+        email: "",
+        password: "",
     };
+
+    const handleSubmit = (values, {
+        setSubmitting }) => {
+        console.log(values);
+        dispatch(loginUser({ data: values, navigate }));
+        setSubmitting(false);
+    }
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -52,43 +61,46 @@ const LoginPage = () => {
                     </Box>
 
                     {error && <Typography color="error">{error}</Typography>}
+                    <Formik onSubmit={handleSubmit} initialValues={initialValues} validationSchema={validationSchema} >
 
-                    <form onSubmit={handleLogin} className="space-y-4">
-                        <TextField
-                            label="Email"
-                            type="email"
-                            fullWidth
-                            variant="outlined"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            className="bg-white rounded-md"
-                        />
-                        <TextField
-                            label="Password"
-                            type="password"
-                            fullWidth
-                            variant="outlined"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            className="bg-white rounded-md"
-                        />
-                        <Button
-                            type="submit"
-                            fullWidth
-                            variant="contained"
-                            className="bg-red-600 hover:bg-lime-700 text-white py-2 px-4 rounded-lg"
-                        >
-                            Login
-                        </Button>
-                    </form>
+                        <Form className="space-y-4">
+                            <Field as={TextField}
+                                name="email"
+                                label="Email"
+                                type="email"
+                                fullWidth
+                                variant="outlined"
+                                required
+                                className="bg-white rounded-md"
+                            />
+                            <Field as={TextField}
+
+                                name="password"
+                                label="Password"
+                                type="password"
+                                fullWidth
+                                variant="outlined"
+
+                                required
+                                className="bg-white rounded-md"
+                            />
+                            <Button
+                                type="submit"
+                                fullWidth
+                                variant="contained"
+                                className="bg-red-600 hover:bg-lime-700 text-white py-2 px-4 rounded-lg"
+                            >
+                                Login
+                            </Button>
+                        </Form>
+                    </Formik>
+
 
                     <Typography variant="body2" className="text-center mt-4 text-gray-500">
-                        Don't have an account?{' '}
-                        <a href="/register" className="text-red-600 hover:underline">
-                            Sign Up
-                        </a>
+                        Don't have account ?
+                        <Button onClick={() => navigate("/register")} size="small">
+                            SignUp
+                        </Button>
                     </Typography>
                 </div>
             </Paper>

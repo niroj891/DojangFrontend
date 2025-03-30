@@ -10,6 +10,7 @@ import Leaderboard from "../pages/Leaderboard";
 import Community from "../pages/Community";
 import UserLayout from "../Layout";
 import ProfilePage from "../Component/ProfilePage";
+import Profile from "../pages/Profile";
 
 
 
@@ -34,7 +35,7 @@ function UserRoutes() {
                 <Route path='events' element={<Events />} />
                 <Route path="community" element={<Community />} />
                 <Route path="register" element={<RegisterPage />} />
-                <Route path="profile" element={<ProfilePage />} />
+                <Route path="profile" element={<Profile />} />
 
             </Route>
 

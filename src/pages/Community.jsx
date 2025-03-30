@@ -7,6 +7,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import VideoLibraryIcon from "@mui/icons-material/VideoLibrary";
 import EventIcon from "@mui/icons-material/Event";
 import GroupIcon from "@mui/icons-material/Group";
+import ChatIcon from '@mui/icons-material/Chat';
 
 const Community = () => {
     return (
@@ -36,6 +37,10 @@ const Community = () => {
                         <div className="flex items-center space-x-2 cursor-pointer hover:bg-gray-200 p-2 rounded">
                             <EventIcon className="text-blue-500" />
                             <p>Events</p>
+                        </div>
+                        <div className="flex items-center space-x-2 cursor-pointer hover:bg-gray-200 p-2 rounded">
+                            <ChatIcon className="text-blue-500" />
+                            <p>Chat</p>
                         </div>
                     </div>
                 </div>
