@@ -11,6 +11,7 @@ import Community from "../pages/Community";
 import UserLayout from "../Layout";
 import ProfilePage from "../Component/ProfilePage";
 import Profile from "../pages/Profile";
+import RegistrationForm from "../pages/RegistrationForm";
 
 
 
@@ -36,6 +37,8 @@ function UserRoutes() {
                 <Route path="community" element={<Community />} />
                 <Route path="register" element={<RegisterPage />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="events/:eventId/register" element={<RegistrationForm />} />
+
 
             </Route>
 

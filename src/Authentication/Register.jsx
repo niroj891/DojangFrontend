@@ -1,8 +1,7 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config/api";
 import { useNavigate } from "react-router-dom";
-
 
 const RegisterPage = () => {
     const [formData, setFormData] = useState({
@@ -14,8 +13,22 @@ const RegisterPage = () => {
         confirmPassword: "",
     });
 
+    const [errors, setErrors] = useState({});
     const [message, setMessage] = useState("");
+    const [messageType, setMessageType] = useState(""); // "success" or "error"
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
+
+    // Clear message after 5 seconds
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => {
+                setMessage("");
+                setMessageType("");
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
 
     // Handle input changes
     const handleChange = (e) => {
@@ -24,17 +37,69 @@ const RegisterPage = () => {
             ...formData,
             [name]: value,
         });
+
+        // Clear field-specific error when user types
+        if (errors[name]) {
+            setErrors({
+                ...errors,
+                [name]: ""
+            });
+        }
+    };
+
+    // Validate form
+    const validateForm = () => {
+        const newErrors = {};
+
+        // Validate first name
+        if (!formData.firstName.trim()) {
+            newErrors.firstName = "First name is required";
+        }
+
+        // Validate last name
+        if (!formData.lastName.trim()) {
+            newErrors.lastName = "Last name is required";
+        }
+
+        // Validate phone number
+        if (!formData.phoneNumber.trim()) {
+            newErrors.phoneNumber = "Phone number is required";
+        } else if (!/^\d{10,12}$/.test(formData.phoneNumber.replace(/[^0-9]/g, ""))) {
+            newErrors.phoneNumber = "Please enter a valid phone number";
+        }
+
+        // Validate email
+        if (!formData.email.trim()) {
+            newErrors.email = "Email is required";
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = "Please enter a valid email address";
+        }
+
+        // Validate password
+        if (!formData.password) {
+            newErrors.password = "Password is required";
+        } else if (formData.password.length < 8) {
+            newErrors.password = "Password must be at least 8 characters";
+        }
+
+        // Validate confirm password
+        if (formData.password !== formData.confirmPassword) {
+            newErrors.confirmPassword = "Passwords do not match";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     // Handle form submission
     const handleRegister = async (e) => {
         e.preventDefault();
 
-        // Validate form
-        if (formData.password !== formData.confirmPassword) {
-            setMessage("Passwords do not match.");
+        if (!validateForm()) {
             return;
         }
+
+        setIsLoading(true);
 
         try {
             // API call to register endpoint
@@ -45,9 +110,10 @@ const RegisterPage = () => {
                 email: formData.email,
                 password: formData.password,
             });
-            setMessage(`Registration successful for ${response.data.firstName}`);
-            // Navigate the register to login page after sucessful registration setout time 2 seconds.
-            //setTimeout(() => Navigate("/login"), 2000);
+
+            // Show success message
+            setMessage(`Registration successful! Welcome, ${response.data.firstName}. Redirecting to login...`);
+            setMessageType("success");
 
             // Reset form
             setFormData({
@@ -58,126 +124,168 @@ const RegisterPage = () => {
                 password: "",
                 confirmPassword: "",
             });
+
+            // Navigate to login page after successful registration
             setTimeout(() => {
-                console.log("Navigating to login...");
                 navigate("/login");
             }, 2000);
 
-
-
         } catch (error) {
             setMessage(
-                error.response?.data?.message || "Registration failed. Try again."
+                error.response?.data?.message || "Registration failed. Please try again."
             );
+            setMessageType("error");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="flex flex-col md:flex-row h-[80vh] justify-center items-center">
-            {/* Right Section: Taekwondo Image */}
-            <div className="w-full md:w-2/5 h-[80vh] bg-gray-100 flex justify-center items-center opacity-90">
-                <img
-                    src="/image/TaekwondoRegister.jpg"
-                    alt="Taekwondo"
-                    className="w-full h-full object-cover rounded-lg"
-                />
+        <div className="flex flex-col md:flex-row min-h-[80vh] justify-center items-center bg-gray-50">
+            {/* Left Section: Registration Form */}
+            <div className="w-full md:w-1/2 lg:w-2/5 px-4 py-8 md:py-12">
+                <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-4 md:p-8">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Create an Account</h2>
+                    <p className="text-gray-600 mb-6 text-center">Join our Taekwondo community today</p>
+
+                    {message && (
+                        <div
+                            className={`mb-4 p-3 rounded-lg text-sm ${messageType === "success"
+                                ? "bg-green-100 text-green-700 border border-green-200"
+                                : "bg-red-100 text-red-700 border border-red-200"
+                                }`}
+                        >
+                            {message}
+                        </div>
+                    )}
+
+                    <form className="space-y-5" onSubmit={handleRegister}>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    className={`w-full px-4 py-2 border ${errors.firstName ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                    placeholder="John"
+                                />
+                                {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    className={`w-full px-4 py-2 border ${errors.lastName ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                    placeholder="Doe"
+                                />
+                                {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                            <input
+                                type="tel"
+                                name="phoneNumber"
+                                value={formData.phoneNumber}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 border ${errors.phoneNumber ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                placeholder="(123) 456-7890"
+                            />
+                            {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 border ${errors.email ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                placeholder="your.email@example.com"
+                            />
+                            {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 border ${errors.password ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                placeholder="••••••••"
+                            />
+                            {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+                            {formData.password && !errors.password && (
+                                <p className="mt-1 text-xs text-gray-500">Password strength: {formData.password.length >= 12 ? "Strong" : formData.password.length >= 8 ? "Good" : "Weak"}</p>
+                            )}
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                            <input
+                                type="password"
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleChange}
+                                className={`w-full px-4 py-2 border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                placeholder="••••••••"
+                            />
+                            {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
+                        </div>
+
+                        <div className="pt-2">
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full bg-blue-400 text-white py-3 px-4 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors font-medium flex items-center justify-center"
+                            >
+                                {isLoading ? (
+                                    <>
+                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Processing...
+                                    </>
+                                ) : "Create Account"}
+                            </button>
+                        </div>
+                    </form>
+
+                    <div className="mt-6 text-center text-sm">
+                        <p className="text-gray-600">
+                            Already have an account?{" "}
+                            <a href="/login" className="text-blue-500 hover:text-blue-700 font-medium">
+                                Log in
+                            </a>
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            {/* Left Section: Registration Form */}
-            <div className="w-full md:w-2/5 h-[80vh] bg-pink-50 flex flex-col justify-center items-center p-8">
-                <h2 className="text-3xl font-bold text-gray-800 mb-6">Create an Account</h2>
-
-                {message && <p className="text-red-500">{message}</p>}
-
-                <form className="w-full max-w-sm" onSubmit={handleRegister}>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                            <input
-                                type="text"
-                                name="firstName"
-                                value={formData.firstName}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                placeholder="First Name"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                            <input
-                                type="text"
-                                name="lastName"
-                                value={formData.lastName}
-                                onChange={handleChange}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                                placeholder="Last Name"
-                                required
-                            />
-                        </div>
+            {/* Right Section: Taekwondo Image */}
+            <div className="hidden md:block w-1/2 lg:w-3/5 h-[80vh]">
+                <div className="h-full w-full relative overflow-hidden bg-gray-100 rounded-l-xl">
+                    <img
+                        src="/image/TaekwondoRegister.jpg"
+                        alt="Taekwondo training"
+                        className="w-full h-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 p-8 md:p-10 text-black max-w-md">
+                        <h3 className="text-2xl font-bold mb-2 drop-shadow-md">Join Our Taekwondo Community</h3>
+                        <p className="text-sm drop-shadow-md">Discover the benefits of training with our experienced instructors in a supportive environment.</p>
                     </div>
-
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
-                        <input
-                            type="text"
-                            name="phoneNumber"
-                            value={formData.phoneNumber}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                            placeholder="Enter your phone number"
-                            required
-                        />
-                    </div>
-
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                            placeholder="Enter your email"
-                            required
-                        />
-                    </div>
-
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                            placeholder="Enter your password"
-                            required
-                        />
-                    </div>
-
-                    <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-                        <input
-                            type="password"
-                            name="confirmPassword"
-                            value={formData.confirmPassword}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-blue-400 focus:outline-none"
-                            placeholder="Confirm your password"
-                            required
-                        />
-                    </div>
-
-                    <div className="mt-6">
-                        <button
-                            type="submit"
-                            className="w-full bg-blue-400 text-white py-2 px-4 rounded-full hover:bg-slate-200 hover:text-black focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        >
-                            Register
-                        </button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
     );

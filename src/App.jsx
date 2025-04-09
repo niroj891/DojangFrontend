@@ -3,7 +3,6 @@ import { TablePagination } from '@mui/material'
 import HomePage from './HomePage.jsx'
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Footer from './Authentication/Footer.jsx'
-import Navbar from './Navbar.jsx';
 import UserRoutes from './routes/UserRoutes.jsx';
 import RouteHandler from './routes/Router.jsx';
 

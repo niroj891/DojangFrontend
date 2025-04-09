@@ -28,15 +28,22 @@ import {
 
 
 
+
+
 export const loginUser = (loginData) => async (dispatch) => {
     dispatch({ type: LOGIN_REQUEST });
     try {
         const response = await axios.post(`${API_BASE_URL}/auth/signin`, loginData.data);
         const user = response.data;
-        console.log("login user -: ", user);
+        //console.log("login user -: ", user);
         if (user.jwt) {
             localStorage.setItem("jwt", user.jwt);
-            loginData.navigate("/")
+            //loginData.navigate("/")
+            if (user.role == "USER") {
+                window.location.href = '/'
+            } else if (user.role == "INSTRUCTOR") {
+                window.location.href = `/instructor`
+            }
         }
         dispatch({ type: LOGIN_SUCCESS, payload: user });
     } catch (error) {

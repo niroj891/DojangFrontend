@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-//import { AppBar, Toolbar, IconButton, Drawer, List, ListItem, ListItemText, Button } from "@mui/material";
 import { Menu } from "@mui/icons-material";
+import { useRecoilState } from "recoil";
+import { isLogin } from "../recoil/user";
 
 const navItems = ["Home", "Events", "About", "Leaderboard", "Community", "Contact"];
 
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [isUserLoggedIn, setIsUserLoggedIn] = useRecoilState(isLogin);
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -37,12 +39,21 @@ export default function Navbar() {
                             {item}
                         </Link>
                     ))}
-                    <Link
-                        to="/login"
-                        className="bg-blue-500 text-white px-6 py-1 rounded-lg text-xl hover:bg-blue-600 transition"
-                    >
-                        Login
-                    </Link>
+                    {isUserLoggedIn ? (
+                        <Link
+                            to="/profile"
+                            className="bg-green-500 text-white px-6 py-1 rounded-lg text-xl hover:bg-green-600 transition"
+                        >
+                            Profile
+                        </Link>
+                    ) : (
+                        <Link
+                            to="/login"
+                            className="bg-blue-500 text-white px-6 py-1 rounded-lg text-xl hover:bg-blue-600 transition"
+                        >
+                            Login
+                        </Link>
+                    )}
                 </div>
 
                 {/* Mobile Menu Button (Repositioned to Right) */}
@@ -70,16 +81,28 @@ export default function Navbar() {
                                     key={item}
                                     to={`/${item.toLowerCase()}`}
                                     className="text-xl text-black hover:text-blue-500 transition"
+                                    onClick={handleDrawerToggle}
                                 >
                                     {item}
                                 </Link>
                             ))}
-                            <Link
-                                to="/login"
-                                className="bg-blue-500 text-white px-6 py-2 rounded-lg text-xl text-center hover:bg-blue-600 transition"
-                            >
-                                Login
-                            </Link>
+                            {isUserLoggedIn ? (
+                                <Link
+                                    to="/profile"
+                                    className="bg-green-500 text-white px-6 py-2 rounded-lg text-xl text-center hover:bg-green-600 transition"
+                                    onClick={handleDrawerToggle}
+                                >
+                                    Profile
+                                </Link>
+                            ) : (
+                                <Link
+                                    to="/login"
+                                    className="bg-blue-500 text-white px-6 py-2 rounded-lg text-xl text-center hover:bg-blue-600 transition"
+                                    onClick={handleDrawerToggle}
+                                >
+                                    Login
+                                </Link>
+                            )}
                         </div>
                     </div>
                 </div>

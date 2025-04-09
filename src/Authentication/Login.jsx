@@ -25,6 +25,9 @@ const LoginPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
+
+
+
     const initialValues = {
         email: "",
         password: "",
@@ -73,6 +76,11 @@ const LoginPage = () => {
                                 required
                                 className="bg-white rounded-md"
                             />
+                            <ErrorMessage
+                                name="email"
+                                component="div"
+                                className="text-red-500"
+                            />
                             <Field as={TextField}
 
                                 name="password"
@@ -83,6 +91,11 @@ const LoginPage = () => {
 
                                 required
                                 className="bg-white rounded-md"
+                            />
+                            <ErrorMessage
+                                name="password"
+                                component="div"
+                                className="text-red-500"
                             />
                             <Button
                                 type="submit"
