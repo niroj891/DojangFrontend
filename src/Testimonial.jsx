@@ -12,7 +12,7 @@ export default function Testimonial() {
                     {/* Card 1 */}
                     <div className="bg-white p-6 rounded-lg shadow-lg text-center transition-transform transform hover:scale-105 hover:shadow-2xl">
                         <img
-                            src="https://via.placeholder.com/150" // Replace with instructor's photo
+                            src="/image/IMG_0158.JPG"
                             alt="Instructor 1"
                             className="w-32 h-32 mx-auto rounded-full object-cover mb-4"
                         />
@@ -25,20 +25,20 @@ export default function Testimonial() {
                     {/* Card 2 */}
                     <div className="bg-white p-6 rounded-lg shadow-lg text-center transition-transform transform hover:scale-105 hover:shadow-2xl">
                         <img
-                            src="https://via.placeholder.com/150" // Replace with instructor's photo
+                            src="/image/IMG_0157.JPG" // Replace with instructor's photo
                             alt="Instructor 2"
                             className="w-32 h-32 mx-auto rounded-full object-cover mb-4"
                         />
                         <blockquote className="text-xl italic mb-4">
                             "This platform makes training more interactive and keeps me connected with my students all over the world."
                         </blockquote>
-                        <p className="text-lg font-bold">– Kumar Gurung, 3rd Dan Black Belt</p>
+                        <p className="text-lg font-bold">– Norbu Lama, 7th Dan Black Belt</p>
                     </div>
 
                     {/* Card 3 */}
                     <div className="bg-white p-6 rounded-lg shadow-lg text-center transition-transform transform hover:scale-105 hover:shadow-2xl">
                         <img
-                            src="https://via.placeholder.com/150" // Replace with instructor's photo
+                            src="/image/deepak.jpg"
                             alt="Instructor 3"
                             className="w-32 h-32 mx-auto rounded-full object-cover mb-4"
                         />

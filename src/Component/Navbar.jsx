@@ -15,7 +15,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className="bg-gray-100 shadow-md p-4 sticky top-0 z-50">
+        <nav className="bg-gray-100 shadow-md p-2 sticky top-0 z-50">
             <div className="container mx-auto flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/home" className="text-2xl font-bold text-black hover:text-gray-600  transition flex  items-center space-x-3">

@@ -64,8 +64,6 @@ const RegisterPage = () => {
         // Validate phone number
         if (!formData.phoneNumber.trim()) {
             newErrors.phoneNumber = "Phone number is required";
-        } else if (!/^\d{10,12}$/.test(formData.phoneNumber.replace(/[^0-9]/g, ""))) {
-            newErrors.phoneNumber = "Please enter a valid phone number";
         }
 
         // Validate email
@@ -141,12 +139,12 @@ const RegisterPage = () => {
     };
 
     return (
-        <div className="flex flex-col md:flex-row min-h-[80vh] justify-center items-center bg-gray-50">
+        <div className="flex flex-col md:flex-row min-h-[75vh] justify-center items-center bg-gray-50">
             {/* Left Section: Registration Form */}
-            <div className="w-full md:w-1/2 lg:w-2/5 px-4 py-8 md:py-12">
-                <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-4 md:p-8">
+            <div className=" md:w-1/2 lg:w-2/5 px-4 py-4 md:py-2 mt-14 ">
+                <div className="max-w- mx-auto bg-white rounded-xl shadow-md overflow-hidden p-4 md:p-2">
                     <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Create an Account</h2>
-                    <p className="text-gray-600 mb-6 text-center">Join our Taekwondo community today</p>
+                    <p className="text-gray-600 mb-3 text-center">Join our Taekwondo community today</p>
 
                     {message && (
                         <div
@@ -169,7 +167,7 @@ const RegisterPage = () => {
                                     value={formData.firstName}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-2 border ${errors.firstName ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
-                                    placeholder="John"
+                                    placeholder="First Name"
                                 />
                                 {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
                             </div>
@@ -181,7 +179,7 @@ const RegisterPage = () => {
                                     value={formData.lastName}
                                     onChange={handleChange}
                                     className={`w-full px-4 py-2 border ${errors.lastName ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
-                                    placeholder="Doe"
+                                    placeholder="Last Name"
                                 />
                                 {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
                             </div>
@@ -273,7 +271,7 @@ const RegisterPage = () => {
             </div>
 
             {/* Right Section: Taekwondo Image */}
-            <div className="hidden md:block w-1/2 lg:w-3/5 h-[80vh]">
+            <div className=" md:block w-1/2 lg:w-2.5/5 h-[80vh]">
                 <div className="h-full w-full relative overflow-hidden bg-gray-100 rounded-l-xl">
                     <img
                         src="/image/TaekwondoRegister.jpg"

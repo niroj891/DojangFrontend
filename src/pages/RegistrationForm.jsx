@@ -68,7 +68,7 @@ const RegistrationForm = () => {
             // Optionally navigate after a delay to let user see the success message
             setTimeout(() => {
                 navigate('/events', { state: { registrationSuccess: true } });
-            }, 2000);
+            }, 4000);
 
         } catch (error) {
             console.error('Registration error:', error);
@@ -85,6 +85,8 @@ const RegistrationForm = () => {
                     errorMessage = 'Session expired. Please login again.';
                 } else if (error.response.status === 409) {
                     errorMessage = 'You are already registered for this event.';
+                } else if (error.response.status === 500) {
+                    errorMessage = 'User Already Exists.';
                 }
             } else if (error.request) {
                 // Request was made but no response received

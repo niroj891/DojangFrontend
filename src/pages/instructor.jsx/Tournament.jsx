@@ -15,7 +15,7 @@ const TournamentManager = () => {
     const [success, setSuccess] = useState(null);
 
     // Weight categories from enum
-    const weightCategories = ['BELOW54', 'BELOW58', 'BELOW63'];
+    const weightCategories = ['BELOW54', 'BELOW58', 'BELOW63', 'BELOW68'];
 
     // Fetch events on component mount
     useEffect(() => {
