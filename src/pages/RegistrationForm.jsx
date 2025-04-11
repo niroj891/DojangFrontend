@@ -53,23 +53,28 @@ const RegistrationForm = () => {
                 }
             );
 
-            // Success message from backend if available, otherwise use custom message
-            const successMessage = response.data?.message || 'Registration successful!';
-            setSuccess(successMessage);
+            console.log(response.status)
+            if (response.status == 200) {
+                // Success message from backend if available, otherwise use custom message
+                const successMessage = response.data?.message || 'Registration successful!';
+                setSuccess(successMessage);
+                // Clear form on successful submission
+                setFormData({
+                    firstName: '',
+                    lastName: '',
+                    dojangName: '',
+                    weightCategory: ''
+                });
 
-            // Clear form on successful submission
-            setFormData({
-                firstName: '',
-                lastName: '',
-                dojangName: '',
-                weightCategory: ''
-            });
+                // Optionally navigate after a delay to let user see the success message
+                setTimeout(() => {
+                    navigate('/events', { state: { registrationSuccess: true } });
+                }, 4000);
+            } else {
 
-            // Optionally navigate after a delay to let user see the success message
-            setTimeout(() => {
-                navigate('/events', { state: { registrationSuccess: true } });
-            }, 4000);
-
+                const errormessage = "User already exists";
+                setError(errormessage)
+            }
         } catch (error) {
             console.error('Registration error:', error);
 
@@ -78,13 +83,12 @@ const RegistrationForm = () => {
 
             if (error.response) {
                 // Backend returned an error response
-                errorMessage = error.response.data?.message || errorMessage;
+                errorMessage = error.response.data || errorMessage;
 
                 // Handle specific status codes
-                if (error.response.status === 401) {
-                    errorMessage = 'Session expired. Please login again.';
-                } else if (error.response.status === 409) {
-                    errorMessage = 'You are already registered for this event.';
+                if (error.response.status === 500) {
+                    errorMessage = 'User Already registered';
+
                 } else if (error.response.status === 500) {
                     errorMessage = 'User Already Exists.';
                 }

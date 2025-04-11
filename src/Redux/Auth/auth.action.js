@@ -30,25 +30,52 @@ import {
 
 
 
-export const loginUser = (loginData) => async (dispatch) => {
+// export const loginUser = (loginData) => async (dispatch) => {
+//     dispatch({ type: LOGIN_REQUEST });
+//     try {
+//         const response = await axios.post(`${API_BASE_URL}/auth/signin`, loginData.data);
+//         const user = response.data;
+//         //console.log("login user -: ", user);
+//         if (user.jwt) {
+//             localStorage.setItem("jwt", user.jwt);
+//             //loginData.navigate("/")
+//             if (user.role == "USER") {
+//                 window.location.href = '/'
+//             } else if (user.role == "INSTRUCTOR") {
+//                 window.location.href = `/instructor`
+//             }
+//         }
+//         dispatch({ type: LOGIN_SUCCESS, payload: user });
+//     } catch (error) {
+//         console.log("error ", error)
+//         dispatch({ type: LOGIN_FAILURE, payload: error.message });
+//     }
+// };
+
+
+export const loginUser = ({ data, navigate, onSuccess, onError }) => async (dispatch) => {
     dispatch({ type: LOGIN_REQUEST });
     try {
-        const response = await axios.post(`${API_BASE_URL}/auth/signin`, loginData.data);
+        const response = await axios.post(`${API_BASE_URL}/auth/signin`, data);
         const user = response.data;
-        //console.log("login user -: ", user);
+
         if (user.jwt) {
             localStorage.setItem("jwt", user.jwt);
-            //loginData.navigate("/")
-            if (user.role == "USER") {
-                window.location.href = '/'
-            } else if (user.role == "INSTRUCTOR") {
-                window.location.href = `/instructor`
+
+            // Redirect based on role
+            if (user.role === "USER") {
+                window.location.href = '/';
+            } else if (user.role === "INSTRUCTOR") {
+                window.location.href = '/instructor';
             }
+
+            dispatch({ type: LOGIN_SUCCESS, payload: user });
+            if (onSuccess) onSuccess();
         }
-        dispatch({ type: LOGIN_SUCCESS, payload: user });
     } catch (error) {
-        console.log("error ", error)
+        console.log("error", error);
         dispatch({ type: LOGIN_FAILURE, payload: error.message });
+        if (onError) onError(error);
     }
 };
 

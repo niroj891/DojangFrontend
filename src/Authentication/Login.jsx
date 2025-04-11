@@ -1,44 +1,52 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { TextField, Button, Typography, Box, Paper, Divider } from "@mui/material";
+import { TextField, Button, Typography, Box, Paper, Divider, Alert } from "@mui/material";
 import { API_BASE_URL } from "../config/api.js";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux"
+import { useDispatch } from "react-redux";
 import { loginUser } from "../Redux/Auth/auth.action";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 
-
 const validationSchema = Yup.object().shape({
-
     email: Yup.string().email("Invalid email").required("Email is required"),
     password: Yup.string()
         .min(6, "Password must be at least 6 characters")
         .required("Password is required"),
 });
 
-
 const LoginPage = () => {
-    // const [email, setEmail] = useState("");
-    // const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [authError, setAuthError] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-
-
-
 
     const initialValues = {
         email: "",
         password: "",
     };
 
-    const handleSubmit = (values, {
-        setSubmitting }) => {
-        console.log(values);
-        dispatch(loginUser({ data: values, navigate }));
+    const handleSubmit = (values, { setSubmitting }) => {
+        setAuthError(null);
+        dispatch(loginUser({
+            data: values,
+            navigate,
+            onSuccess: () => { },
+            onError: (error) => {
+                if (error.response && error.response.data) {
+                    setAuthError({
+                        message: error.response.data.message,
+                        isUsernameError: error.response.data.message === "Incorrect username"
+                    });
+                } else {
+                    setAuthError({
+                        message: "An error occurred. Please try again.",
+                        isUsernameError: false
+                    });
+                }
+            }
+        }));
         setSubmitting(false);
-    }
+    };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -52,6 +60,7 @@ const LoginPage = () => {
                     />
                 </div>
                 <Divider orientation="vertical" flexItem className="hidden md:block bg-gray-300 w-[1px]" />
+
                 {/* Right Side - Login Form */}
                 <div className="w-full md:w-1/2 p-6 sm:p-10 bg-white flex flex-col justify-center">
                     <Box textAlign="center" mb={3}>
@@ -63,51 +72,76 @@ const LoginPage = () => {
                         </Typography>
                     </Box>
 
-                    {error && <Typography color="error">{error}</Typography>}
-                    <Formik onSubmit={handleSubmit} initialValues={initialValues} validationSchema={validationSchema} >
+                    {/* Fixed height error container */}
+                    <div className="min-h-[56px]">
+                        {authError && (
+                            <Alert severity="error" sx={{ mb: 2 }}>
+                                {authError.message}
+                            </Alert>
+                        )}
+                    </div>
 
-                        <Form className="space-y-4">
-                            <Field as={TextField}
-                                name="email"
-                                label="Email"
-                                type="email"
-                                fullWidth
-                                variant="outlined"
-                                required
-                                className="bg-white rounded-md"
-                            />
-                            <ErrorMessage
-                                name="email"
-                                component="div"
-                                className="text-red-500"
-                            />
-                            <Field as={TextField}
+                    <Formik
+                        onSubmit={handleSubmit}
+                        initialValues={initialValues}
+                        validationSchema={validationSchema}
+                    >
+                        {({ isSubmitting }) => (
+                            <Form className="space-y-4">
+                                {/* Email Field */}
+                                <div className="min-h-[80px]">
+                                    <Field
+                                        as={TextField}
+                                        name="email"
+                                        label="Email"
+                                        type="email"
+                                        fullWidth
+                                        variant="outlined"
+                                        required
+                                        className="bg-white rounded-md"
+                                        error={authError?.isUsernameError}
+                                        helperText={authError?.isUsernameError ? "" : null}
+                                    />
+                                    <ErrorMessage
+                                        name="email"
+                                        component="div"
+                                        className="text-red-500"
+                                    />
+                                </div>
 
-                                name="password"
-                                label="Password"
-                                type="password"
-                                fullWidth
-                                variant="outlined"
+                                {/* Password Field */}
+                                <div className="min-h-[80px]">
+                                    <Field
+                                        as={TextField}
+                                        name="password"
+                                        label="Password"
+                                        type="password"
+                                        fullWidth
+                                        variant="outlined"
+                                        required
+                                        className="bg-white rounded-md"
+                                        error={authError && !authError.isUsernameError}
+                                        helperText={authError && !authError.isUsernameError ? "" : null}
+                                    />
+                                    <ErrorMessage
+                                        name="password"
+                                        component="div"
+                                        className="text-red-500"
+                                    />
+                                </div>
 
-                                required
-                                className="bg-white rounded-md"
-                            />
-                            <ErrorMessage
-                                name="password"
-                                component="div"
-                                className="text-red-500"
-                            />
-                            <Button
-                                type="submit"
-                                fullWidth
-                                variant="contained"
-                                className="bg-red-600 hover:bg-lime-700 text-white py-2 px-4 rounded-lg"
-                            >
-                                Login
-                            </Button>
-                        </Form>
+                                <Button
+                                    type="submit"
+                                    fullWidth
+                                    variant="contained"
+                                    className="bg-red-600 hover:bg-lime-700 text-white py-2 px-4 rounded-lg"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? "Logging in..." : "Login"}
+                                </Button>
+                            </Form>
+                        )}
                     </Formik>
-
 
                     <Typography variant="body2" className="text-center mt-4 text-gray-500">
                         Don't have account ?

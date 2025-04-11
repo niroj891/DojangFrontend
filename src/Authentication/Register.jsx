@@ -11,15 +11,15 @@ const RegisterPage = () => {
         email: "",
         password: "",
         confirmPassword: "",
+        role: "USER", // Added role field with default value
     });
 
     const [errors, setErrors] = useState({});
     const [message, setMessage] = useState("");
-    const [messageType, setMessageType] = useState(""); // "success" or "error"
+    const [messageType, setMessageType] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Clear message after 5 seconds
     useEffect(() => {
         if (message) {
             const timer = setTimeout(() => {
@@ -30,7 +30,6 @@ const RegisterPage = () => {
         }
     }, [message]);
 
-    // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData({
@@ -38,7 +37,6 @@ const RegisterPage = () => {
             [name]: value,
         });
 
-        // Clear field-specific error when user types
         if (errors[name]) {
             setErrors({
                 ...errors,
@@ -47,49 +45,46 @@ const RegisterPage = () => {
         }
     };
 
-    // Validate form
     const validateForm = () => {
         const newErrors = {};
 
-        // Validate first name
         if (!formData.firstName.trim()) {
             newErrors.firstName = "First name is required";
         }
 
-        // Validate last name
         if (!formData.lastName.trim()) {
             newErrors.lastName = "Last name is required";
         }
 
-        // Validate phone number
         if (!formData.phoneNumber.trim()) {
             newErrors.phoneNumber = "Phone number is required";
         }
 
-        // Validate email
         if (!formData.email.trim()) {
             newErrors.email = "Email is required";
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = "Please enter a valid email address";
         }
 
-        // Validate password
         if (!formData.password) {
             newErrors.password = "Password is required";
         } else if (formData.password.length < 8) {
             newErrors.password = "Password must be at least 8 characters";
         }
 
-        // Validate confirm password
         if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = "Passwords do not match";
+        }
+
+        // Validate role
+        if (!formData.role) {
+            newErrors.role = "Please select a role";
         }
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
 
-    // Handle form submission
     const handleRegister = async (e) => {
         e.preventDefault();
 
@@ -100,20 +95,18 @@ const RegisterPage = () => {
         setIsLoading(true);
 
         try {
-            // API call to register endpoint
             const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 phoneNumber: formData.phoneNumber,
                 email: formData.email,
                 password: formData.password,
+                role: formData.role, // Added role to the request body
             });
 
-            // Show success message
             setMessage(`Registration successful! Welcome, ${response.data.firstName}. Redirecting to login...`);
             setMessageType("success");
 
-            // Reset form
             setFormData({
                 firstName: "",
                 lastName: "",
@@ -121,9 +114,9 @@ const RegisterPage = () => {
                 email: "",
                 password: "",
                 confirmPassword: "",
+                role: "USER",
             });
 
-            // Navigate to login page after successful registration
             setTimeout(() => {
                 navigate("/login");
             }, 2000);
@@ -196,6 +189,36 @@ const RegisterPage = () => {
                                 placeholder="(123) 456-7890"
                             />
                             {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
+                        </div>
+
+                        {/* Added Role Selection */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Register As</label>
+                            <div className="grid grid-cols-2 gap-3 mt-1">
+                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer ${formData.role === 'USER' ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
+                                    <input
+                                        type="radio"
+                                        name="role"
+                                        value="USER"
+                                        checked={formData.role === "USER"}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-400 focus:ring-blue-400"
+                                    />
+                                    <span className="ml-2 text-sm">USER</span>
+                                </label>
+                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer ${formData.role === 'INSTRUCTOR' ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
+                                    <input
+                                        type="radio"
+                                        name="role"
+                                        value="INSTRUCTOR"
+                                        checked={formData.role === "INSTRUCTOR"}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-400 focus:ring-blue-400"
+                                    />
+                                    <span className="ml-2 text-sm">Instructor</span>
+                                </label>
+                            </div>
+                            {errors.role && <p className="mt-1 text-xs text-red-500">{errors.role}</p>}
                         </div>
 
                         <div>
