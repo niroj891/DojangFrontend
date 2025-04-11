@@ -85,7 +85,7 @@ const TournamentManager = () => {
 
                 // Set current match if there's an incomplete one
                 const incompleteMatch = response.data.matches.find(
-                    m => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS'
+                    m => m.status === 'IN_PROGRESS' || m.status === 'COMPLETED'
                 );
                 setCurrentMatch(incompleteMatch);
             } catch (err) {
