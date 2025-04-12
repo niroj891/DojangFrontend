@@ -8,13 +8,14 @@ const TournamentManager = () => {
     const [selectedWeightCategory, setSelectedWeightCategory] = useState(null);
     const [participants, setParticipants] = useState([]);
     const [matches, setMatches] = useState([]);
-    const [rounds, setRounds] = useState([]);
+    const [results, setResults] = useState([]);
+    const [matchResults, setMatchResults] = useState([]);
     const [currentMatch, setCurrentMatch] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(null);
+    const [currentMatchResult, setCurrentMatchResult] = useState([]);
 
-    // Weight categories from enum
     const weightCategories = ['BELOW54', 'BELOW58', 'BELOW63', 'BELOW68'];
 
     // Fetch events on component mount
@@ -23,9 +24,7 @@ const TournamentManager = () => {
             setIsLoading(true);
             try {
                 const response = await axios.get('http://localhost:9696/instructor/event', {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                    }
+                    headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
                 });
                 setEvents(response.data);
             } catch (err) {
@@ -37,24 +36,25 @@ const TournamentManager = () => {
         fetchEvents();
     }, []);
 
-    // Fetch participants when event is selected
+    // Fetch participants when event AND weight category are selected
     useEffect(() => {
-        if (!selectedEvent) return;
+        if (!selectedEvent || !selectedWeightCategory) return;
 
         const fetchParticipants = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(
-                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants`,
-                    {
-                        headers:
-                        {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
-                );
-                console.log(response.data)
-                setParticipants(response.data);
+                const [participantsRes, matchResultsRes] = await Promise.all([
+                    axios.get(
+                        `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants?weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    ),
+                    axios.get(
+                        `http://localhost:9696/instructor/events/${selectedEvent.eventId}/match-results?weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    )
+                ]);
+                setParticipants(participantsRes.data);
+                setCurrentMatchResult(matchResultsRes.data);
             } catch (err) {
                 setError('Failed to load participants');
             } finally {
@@ -62,39 +62,44 @@ const TournamentManager = () => {
             }
         };
         fetchParticipants();
-    }, [selectedEvent]);
+    }, [selectedEvent, selectedWeightCategory]); // Now triggers on weight category change
 
-    // Fetch tournament progress when weight category is selected
+    // Fetch matches and results when weight category is selected
     useEffect(() => {
         if (!selectedEvent || !selectedWeightCategory) return;
 
-        const fetchTournamentProgress = async () => {
+        const fetchTournamentData = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(
-                    `http://localhost:9696/instructor/tournaments/progress?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`
-                    , {
-                        headers:
-                        {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
-                );
-                setMatches(response.data.matches);
-                setRounds(response.data.rounds);
+                const [matchesResponse, resultsResponse, matchResultsResponse] = await Promise.all([
+                    axios.get(
+                        `http://localhost:9696/instructor/matches?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    ),
+                    axios.get(
+                        `http://localhost:9696/instructor/results?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    ),
+                    axios.get(
+                        `http://localhost:9696/instructor/events/${selectedEvent.eventId}/match-results?weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    )
+                ]);
 
-                // Set current match if there's an incomplete one
-                const incompleteMatch = response.data.matches.find(
-                    m => m.status === 'IN_PROGRESS' || m.status === 'COMPLETED'
+                setMatches(matchesResponse.data);
+                setResults(resultsResponse.data);
+                setMatchResults(matchResultsResponse.data);
+                const current = matchesResponse.data.find(
+                    m => m.status === 'IN_PROGRESS' || m.status === 'SCHEDULED'
                 );
-                setCurrentMatch(incompleteMatch);
+                setCurrentMatch(current);
             } catch (err) {
-                setError('Failed to load tournament progress');
+                setError('Failed to load tournament data');
             } finally {
                 setIsLoading(false);
             }
         };
-        fetchTournamentProgress();
+        fetchTournamentData();
     }, [selectedEvent, selectedWeightCategory]);
 
     // Create a new match
@@ -103,13 +108,13 @@ const TournamentManager = () => {
         setError(null);
         try {
             const response = await axios.post(
-                `http://localhost:9696/instructor/matches/create?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}
-                `, {}, {
-                headers:
+                `http://localhost:9696/instructor/matches/create?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                {},
                 {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                    }
                 }
-            }
             );
             setCurrentMatch(response.data);
             setMatches([...matches, response.data]);
@@ -121,43 +126,74 @@ const TournamentManager = () => {
         }
     };
 
-    // Record round result
-    const recordRoundResult = async (winner, loser) => {
+    // Record match result
+    const recordMatchResult = async (winner, loser) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.post(
-                `http://localhost:9696/instructor/rounds/record?matchId=${currentMatch.id}&winnerId=${winner.id}&loserId=${loser.id}`, {},
+            await axios.post(
+                `http://localhost:9696/instructor/match/result?matchId=${currentMatch.id}&winnerId=${winner.id}&loserId=${loser.id}`,
+                {},
                 {
-                    headers:
-                    {
+                    headers: {
                         Authorization: `Bearer ${localStorage.getItem('jwt')}`
                     }
                 }
             );
 
-            // Update state
-            setRounds([...rounds, response.data]);
-            setCurrentMatch(null);
-            setSuccess('Round result recorded successfully');
+            // Refresh data
+            const [participantsResponse, matchesResponse, resultsResponse, matchResultsResponse] = await Promise.all([
+                axios.get(
+                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                ),
+                axios.get(
+                    `http://localhost:9696/instructor/matches?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                ),
+                axios.get(
+                    `http://localhost:9696/instructor/results?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                ),
+                axios.get(
+                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/match-results?weightCategory=${selectedWeightCategory}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                )
+            ]);
 
-            // Refresh participants
-            const participantsResponse = await axios.get(
-                `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants?weightCategory=${selectedWeightCategory}`, {
-                headers:
-                {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                }
-            }
-            );
             setParticipants(participantsResponse.data);
+            setMatches(matchesResponse.data);
+            setResults(resultsResponse.data);
+            setMatchResults(matchResultsResponse.data);
+            setCurrentMatch(null);
 
             // Check for tournament completion
-            if (participantsResponse.data.filter(p => p.playerStatus === 'NOTOUT').length === 1) {
-                setSuccess(`Tournament complete! Winner: ${participantsResponse.data.find(p => p.playerStatus === 'NOTOUT').firstName}`);
+            const remainingParticipants = participantsResponse.data.filter(
+                p => p.weightCategory === selectedWeightCategory && p.playerStatus === 'NOTOUT'
+            );
+            if (remainingParticipants.length === 1) {
+                setSuccess(`Tournament complete! Winner: ${remainingParticipants[0].firstName} ${remainingParticipants[0].lastName}`);
+            } else {
+                setSuccess('Match result recorded successfully');
             }
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to record round result');
+            setError(err.response?.data?.message || 'Failed to record match result');
         } finally {
             setIsLoading(false);
         }
@@ -169,33 +205,55 @@ const TournamentManager = () => {
         setError(null);
         try {
             await axios.post(
-                `http://localhost:9696/instructor/tournaments/reset?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`, {}, {
-                headers:
+                `http://localhost:9696/instructor/tournaments/reset?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                {},
                 {
-                    Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                    }
                 }
-            }
             );
 
             // Refresh data
-            const [participantsResponse, progressResponse] = await Promise.all([
-                axios.get(`http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants?weightCategory=${selectedWeightCategory}`, {
-                    headers:
+            const [participantsResponse, matchesResponse, resultsResponse, matchResultsResponse] = await Promise.all([
+                axios.get(
+                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants`,
                     {
-                        Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
                     }
-                }),
-                axios.get(`http://localhost:9696/instructor/tournaments/progress?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`, {
-                    headers:
+                ),
+                axios.get(
+                    `http://localhost:9696/instructor/matches?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
                     {
-                        Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
                     }
-                })
+                ),
+                axios.get(
+                    `http://localhost:9696/instructor/results?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                ),
+                axios.get(
+                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/match-results?weightCategory=${selectedWeightCategory}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
+                        }
+                    }
+                )
             ]);
 
             setParticipants(participantsResponse.data);
-            setMatches(progressResponse.data.matches);
-            setRounds(progressResponse.data.rounds);
+            setMatches(matchesResponse.data);
+            setResults(resultsResponse.data);
+            setMatchResults(matchResultsResponse.data);
             setCurrentMatch(null);
             setSuccess('Tournament reset successfully');
         } catch (err) {
@@ -205,17 +263,17 @@ const TournamentManager = () => {
         }
     };
 
-    // Filter participants by status and weight category
-    const getFilteredParticipants = () => {
+    // Filter participants by weight category
+    const getParticipantsByWeightCategory = () => {
         if (!selectedEvent || !selectedWeightCategory) return [];
-        return participants.filter(
-            p => p.weightCategory === selectedWeightCategory && p.playerStatus === 'NOTOUT'
-        );
+        return participants.filter(p => p.weightCategory === selectedWeightCategory);
     };
 
     // Get winner if tournament is complete
     const getWinner = () => {
-        const remaining = getFilteredParticipants();
+        const remaining = participants.filter(
+            p => p.weightCategory === selectedWeightCategory && p.playerStatus === 'NOTOUT'
+        );
         return remaining.length === 1 ? remaining[0] : null;
     };
 
@@ -277,20 +335,166 @@ const TournamentManager = () => {
                     {/* Participants List */}
                     <div className="p-4 bg-white rounded-lg shadow">
                         <h2 className="text-xl font-semibold mb-3">
-                            Participants ({getFilteredParticipants().length} remaining)
+                            Participants
                             {getWinner() && (
                                 <span className="ml-2 text-green-600">Winner: {getWinner().firstName} {getWinner().lastName}</span>
                             )}
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            {getFilteredParticipants().map(participant => (
-                                <div key={participant.id} className="p-3 border rounded-lg">
-                                    <p className="font-medium">{participant.firstName} {participant.lastName}</p>
-                                    <p className="text-sm text-gray-600">{participant.dojangName}</p>
-                                </div>
-                            ))}
+
+                        <div className="mb-4">
+                            <h3 className="font-medium text-lg mb-2">Active Participants (NOT OUT)</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {getParticipantsByWeightCategory()
+                                    .filter(p => p.playerStatus === 'NOTOUT')
+                                    .map(participant => (
+                                        <div key={participant.id} className="p-3 border rounded-lg bg-green-50">
+                                            <p className="font-medium">{participant.firstName} {participant.lastName}</p>
+                                            <p className="text-sm text-gray-600">{participant.dojangName}</p>
+                                            <span className="inline-block mt-1 px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full">
+                                                NOT OUT
+                                            </span>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 className="font-medium text-lg mb-2">Eliminated Participants (OUT)</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                {getParticipantsByWeightCategory()
+                                    .filter(p => p.playerStatus === 'OUT')
+                                    .map(participant => (
+                                        <div key={participant.id} className="p-3 border rounded-lg bg-gray-50">
+                                            <p className="font-medium">{participant.firstName} {participant.lastName}</p>
+                                            <p className="text-sm text-gray-600">{participant.dojangName}</p>
+                                            <span className="inline-block mt-1 px-2 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded-full">
+                                                OUT
+                                            </span>
+                                        </div>
+                                    ))}
+                            </div>
                         </div>
                     </div>
+
+                    {/* <div className="p-4 bg-white rounded-lg shadow">
+                        <h2 className="text-xl font-semibold mb-3">Match Results</h2>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match ID</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {matchResults.map((match) => (
+                                        <tr key={match.matchId}>
+                                            <td className="px-6 py-4 whitespace-nowrap">{match.matchId}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">{match.roundNumber}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {new Date(match.matchDate).toLocaleString()}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                    ${match.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                        match.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
+                                                            'bg-gray-100 text-gray-800'}`}>
+                                                    {match.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {match.winner ? (
+                                                    <div>
+                                                        <div className="font-medium">{match.winner.firstName} {match.winner.lastName}</div>
+                                                        <div className="text-sm text-gray-500">Dojang: {match.winner.dojangName}</div>
+                                                        <div className="text-sm text-gray-500">User: {match.winner.userFirstName || 'N/A'} {match.winner.userLastName || ''}</div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400">Not determined</span>
+                                                )}
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                {match.loser ? (
+                                                    <div>
+                                                        <div className="font-medium">{match.loser.firstName} {match.loser.lastName}</div>
+                                                        <div className="text-sm text-gray-500">Dojang: {match.loser.dojangName}</div>
+                                                        <div className="text-sm text-gray-500">User: {match.loser.userFirstName || 'N/A'} {match.loser.userLastName || ''}</div>
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-gray-400">Not determined</span>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> */}
+                    {currentMatchResult.length > 0 && (
+                        <div className="p-4 bg-white rounded-lg shadow">
+                            <h2 className="text-xl font-semibold mb-3">Detailed Match Results</h2>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Date</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner Details</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser Details</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {currentMatchResult.map((match) => (
+
+                                            <tr key={match.matchId}>
+                                                <td className="px-6 py-4 whitespace-nowrap">{match.roundNumber}</td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {new Date(match.matchDate).toLocaleString()}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                        ${match.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                            match.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
+                                                                'bg-gray-100 text-gray-800'}`}>
+                                                        {match.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {match.winner ? (
+                                                        <div>
+                                                            <div className="font-medium">{match.winner.firstName} {match.winner.lastName}</div>
+                                                            <div className="text-sm text-gray-500">Dojang: {match.winner.dojangName}</div>
+                                                            <div className="text-sm text-gray-500">User ID: {match.winner.userId}</div>
+                                                            <div className="text-sm text-gray-500">Username: {match.winner.username || 'N/A'}</div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-gray-400">Not determined</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    {match.loser ? (
+                                                        <div>
+                                                            <div className="font-medium">{match.loser.firstName} {match.loser.lastName}</   div>
+                                                            <div className="text-sm text-gray-500">Dojang: {match.loser.dojangName}</div>
+                                                            <div className="text-sm text-gray-500">User ID: {match.loser.userId}</div>
+                                                            <div className="text-sm text-gray-500">Username: {match.loser.username || 'N/A'}</div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="text-gray-400">Not determined</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Match Controls */}
                     <div className="p-4 bg-white rounded-lg shadow">
@@ -325,7 +529,7 @@ const TournamentManager = () => {
                                     </h3>
                                     <p className="text-sm text-gray-600">{currentMatch.player1.dojangName}</p>
                                     <button
-                                        onClick={() => recordRoundResult(currentMatch.player1, currentMatch.player2)}
+                                        onClick={() => recordMatchResult(currentMatch.player1, currentMatch.player2)}
                                         disabled={isLoading}
                                         className="mt-3 px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
                                     >
@@ -339,7 +543,7 @@ const TournamentManager = () => {
                                     </h3>
                                     <p className="text-sm text-gray-600">{currentMatch.player2.dojangName}</p>
                                     <button
-                                        onClick={() => recordRoundResult(currentMatch.player2, currentMatch.player1)}
+                                        onClick={() => recordMatchResult(currentMatch.player2, currentMatch.player1)}
                                         disabled={isLoading}
                                         className="mt-3 px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
                                     >
@@ -350,62 +554,28 @@ const TournamentManager = () => {
                         </div>
                     )}
 
-                    {/* Tournament Progress */}
-                    {(matches.length > 0 || rounds.length > 0) && (
+                    {/* Tournament Results */}
+                    {results.length > 0 && (
                         <div className="p-4 bg-white rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-3">Tournament Progress</h2>
-
-                            {/* Matches */}
-                            <h3 className="font-medium mb-2">Matches</h3>
-                            <div className="overflow-x-auto mb-4">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player 1</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Player 2</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {matches.map(match => (
-                                            <tr key={match.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">{match.roundNumber}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {match.player1.firstName} {match.player1.lastName}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {match.player2.firstName} {match.player2.lastName}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{match.status}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {/* Rounds */}
-                            <h3 className="font-medium mb-2">Rounds</h3>
+                            <h2 className="text-xl font-semibold mb-3">Match Results</h2>
                             <div className="overflow-x-auto">
                                 <table className="min-w-full divide-y divide-gray-200">
                                     <thead className="bg-gray-50">
                                         <tr>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
                                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser</th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
-                                        {rounds.map(round => (
-                                            <tr key={round.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">Match {round.match.roundNumber}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">{round.roundNumber}</td>
+                                        {results.map(result => (
+                                            <tr key={result.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">Match {result.match.id}</td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {round.winner.firstName} {round.winner.lastName}
+                                                    {result.winner.firstName} {result.winner.lastName}
                                                 </td>
                                                 <td className="px-6 py-4 whitespace-nowrap">
-                                                    {round.loser.firstName} {round.loser.lastName}
+                                                    {result.loser.firstName} {result.loser.lastName}
                                                 </td>
                                             </tr>
                                         ))}
@@ -414,6 +584,8 @@ const TournamentManager = () => {
                             </div>
                         </div>
                     )}
+
+
                 </div>
             )}
         </div>

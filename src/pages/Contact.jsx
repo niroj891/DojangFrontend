@@ -1,6 +1,7 @@
 export default function Contact() {
     return (
         <div className="bg-white min-h-screen py-12 px-6 md:px-16 lg:px-32 flex flex-col lg:flex-row gap-12">
+
             {/* Left Section - Contact Information */}
             <div className="lg:w-1/2 space-y-6">
                 <h1 className="text-4xl font-bold text-gray-900">Get in Touch</h1>
@@ -28,6 +29,7 @@ export default function Contact() {
 
             {/* Right Section - Contact Form */}
             <div className="lg:w-1/2 bg-white p-6 rounded-2xl shadow-lg">
+
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Send a message</h2>
                 <form className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

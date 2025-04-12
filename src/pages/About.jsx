@@ -50,10 +50,10 @@ export default function About() {
                     <div className="relative p-8 md:p-12 text-center">
                         <h2 className="text-2xl md:text-3xl font-bold text-red-700 mb-6">Our Philosophy</h2>
                         <p className="text-lg md:text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-                            Dojang is a unique social media platform built exclusively for martial artists.
+                            Dojang is a unique platform built exclusively for martial artists.
                             We bring together Taekwondo practitioners and martial arts enthusiasts to share
                             their knowledge, techniques, and experiences in a dedicated space that honors
-                            the traditions while embracing modern community.
+                            the traditions while developing the Taekwondo condition in Nepal.
                         </p>
                     </div>
                 </div>
@@ -68,7 +68,7 @@ export default function About() {
                         </div>
                         <h2 className="text-2xl font-bold text-red-700 mb-4 text-center">Our Mission</h2>
                         <p className="text-gray-700">
-                            To cultivate a strong, engaged martial arts community where members can learn,
+                            To cultivate a strong, engaged martial arts community where players can learn,
                             grow, and support each other on their journey to mastery through the traditions of Taekwondo.
                         </p>
                     </div>
@@ -195,18 +195,18 @@ export default function About() {
 // Sample data for founders
 const founderProfiles = [
     {
-        name: "Master Kim",
-        title: "8th Dan Grand Master",
-        bio: "Olympic gold medalist with over 30 years of teaching experience. Leading the vision for Dojang's training methodology."
+        name: "Niroj Panta",
+        title: "8rd Dan Master",
+        bio: "National gold medalist with over 5 years of teaching experience. Leading the vision for Dojang's training methodology."
     },
     {
-        name: "Master Chen",
+        name: "Master Norbu",
         title: "7th Dan Grand Master",
-        bio: "International coach and judge with expertise in multiple martial arts styles. Oversees community standards and growth."
+        bio: "International coach Refree and judge with expertise in multiple martial arts styles. Oversees community standards and growth."
     },
     {
-        name: "Sarah Johnson",
-        title: "3rd Dan Taekwondo Black Belt",
-        bio: "Former national champion and technology entrepreneur bringing innovation to martial arts education and community building."
+        name: "Aayesha Shakya",
+        title: "5th Dan Taekwondo Black Belt",
+        bio: "Former South-Asian champion and technology entrepreneur bringing innovation to martial arts education and community building."
     }
 ];

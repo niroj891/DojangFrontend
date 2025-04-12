@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Menu } from "@mui/icons-material";
 import { useRecoilState } from "recoil";
 import { isLogin } from "../recoil/user";
@@ -9,6 +9,7 @@ const navItems = ["Home", "Events", "About", "Leaderboard", "Community", "Contac
 export default function Navbar() {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [isUserLoggedIn, setIsUserLoggedIn] = useRecoilState(isLogin);
+    const location = useLocation(); // 👈 added to get current route
 
     const handleDrawerToggle = () => {
         setMobileOpen(!mobileOpen);
@@ -33,8 +34,10 @@ export default function Navbar() {
                         <Link
                             key={item}
                             to={`/${item.toLowerCase()}`}
-                            className="text-xl text-gray-800 rounded-lg py-1 px-1
-                            hover:text-red-600 hover:bg-yellow-200 transition"
+                            className={`text-xl rounded-lg py-1 px-1 transition ${location.pathname === `/${item.toLowerCase()}`
+                                    ? "text-red-600 bg-yellow-200"
+                                    : "text-gray-800 hover:text-red-600 hover:bg-yellow-200"
+                                }`}
                         >
                             {item}
                         </Link>
