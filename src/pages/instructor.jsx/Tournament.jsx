@@ -85,7 +85,7 @@ const TournamentManager = () => {
 
                 // Set current match if there's an incomplete one
                 const incompleteMatch = response.data.matches.find(
-                    m => m.status === 'IN_PROGRESS' || m.status === 'COMPLETED'
+                    m => m.status === 'SCHEDULED' || m.status === 'IN_PROGRESS'
                 );
                 setCurrentMatch(incompleteMatch);
             } catch (err) {
@@ -127,7 +127,7 @@ const TournamentManager = () => {
         setError(null);
         try {
             const response = await axios.post(
-                `http://localhost:9696/instructor/rounds/record?matchId=${currentMatch.id}&winnerId=${winner.id}&loserId=${loser.id}`, {},
+                `http://localhost:9696/instructor/match/result?matchId=${currentMatch.id}&winnerId=${winner.id}&loserId=${loser.id}`, {},
                 {
                     headers:
                     {
