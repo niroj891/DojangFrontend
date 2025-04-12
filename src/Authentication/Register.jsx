@@ -204,7 +204,7 @@ const RegisterPage = () => {
                                         onChange={handleChange}
                                         className="h-4 w-4 text-blue-400 focus:ring-blue-400"
                                     />
-                                    <span className="ml-2 text-sm">USER</span>
+                                    <span className="ml-2 text-sm">User</span>
                                 </label>
                                 <label className={`flex items-center p-3 border rounded-lg cursor-pointer ${formData.role === 'INSTRUCTOR' ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
                                     <input

@@ -154,11 +154,11 @@ function InstructorLayout() {
                         </Link>
 
                         <Link
-                            to="/instructor/settings"
+                            to="/instructor/game"
                             className="flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-indigo-600 transition-colors"
                         >
                             <FaCog className="mr-3 text-lg" />
-                            Settings
+                            Tournament Manager
                         </Link>
                     </nav>
 
