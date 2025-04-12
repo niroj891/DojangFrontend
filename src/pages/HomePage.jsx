@@ -1,13 +1,13 @@
 import React from 'react';
-import Testimonial from './Testimonial';
-import UpcomingEvents from './pages/UpcomingEvents';
+import Testimonial from '../Component/Testimonial';
+import UpcomingEvents from '../Component/UpcomingEvents';
 
 const HomePage = () => {
     return (
         <div className="min-h-screen bg-white font-sans">
             {/* Hero Section */}
             <div className="relative h-screen flex flex-col items-center justify-center bg-cover bg-center overflow-hidden"
-                style={{ backgroundImage: "url('/image/TaekwondoRegister.jpg')" }}>
+                style={{ backgroundImage: "url('/image/TaekwondoRegister.jpg')", backgroundPosition: "center 30%" }}>
 
                 {/* Dark Overlay with improved gradient */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 to-slate-700/80"></div>
@@ -17,8 +17,8 @@ const HomePage = () => {
                     <div className="animate-fade-in-down">
                         <img
                             src="/image/Taekwondo logo.png"
-                            alt="USATKD Logo"
-                            className="mx-auto mb-8 w-32 sm:w-40 md:w-48 rounded-full shadow-lg border-2 border-white/30"
+                            alt="Dojang Logo"
+                            className="mx-auto mb-4 mt-4 w-32 sm:w-40 md:w-48 rounded-full shadow-lg border-2 border-white/30"
                         />
                         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-white leading-tight">
                             Unite, Train, and Grow with Nepal Taekwondo Community

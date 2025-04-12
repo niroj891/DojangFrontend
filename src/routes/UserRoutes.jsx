@@ -1,5 +1,4 @@
 import { Route, Routes } from "react-router-dom";
-import HomePage from "../HomePage";
 import RegisterPage from "../Authentication/Register";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
@@ -12,6 +11,8 @@ import UserLayout from "../Layout";
 import ProfilePage from "../Component/ProfilePage";
 import Profile from "../pages/Profile";
 import RegistrationForm from "../pages/RegistrationForm";
+import HomePage from "../pages/HomePage";
+
 
 
 

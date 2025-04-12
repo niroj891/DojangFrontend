@@ -17,7 +17,7 @@ export default function Testimonial() {
                         <blockquote className="text-xl italic mb-4 text-gray-800">
                             "This platform has helped my students push their limits and achieve their goals faster than before!"
                         </blockquote>
-                        <p className="text-lg font-bold text-red-600">– Asayesha Shakya, 5th Dan Black Belt</p>
+                        <p className="text-lg font-bold text-red-600">– Aayesha Shakya, 5th Dan Black Belt</p>
                     </div>
 
                     {/* Card 2 */}
