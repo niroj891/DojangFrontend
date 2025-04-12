@@ -204,7 +204,6 @@ const TournamentManager = () => {
             setIsLoading(false);
         }
     };
-
     // Filter participants by status and weight category
     const getFilteredParticipants = () => {
         if (!selectedEvent || !selectedWeightCategory) return [];
