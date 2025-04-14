@@ -23,7 +23,7 @@ export default function Testimonial() {
                     {/* Card 2 */}
                     <div className="bg-white p-6 rounded-lg shadow-lg text-center transition-transform transform hover:scale-105 hover:shadow-2xl border-2 border-yellow-400">
                         <img
-                            src="/image/IMG_0157.JPG" // Replace with instructor's photo
+                            src="/image/IMG_0157.JPG"
                             alt="Instructor 2"
                             className="w-32 h-32 mx-auto rounded-full object-cover mb-4 border-4 border-red-600"
                         />

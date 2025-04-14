@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router-dom";
 import RegisterPage from "../Authentication/Register";
 import About from "../pages/About";
 import Contact from "../pages/Contact";
-import Classes from "../pages/Classes";
 import Events from "../pages/Events";
 import LoginPage from "../Authentication/Login";
 import Leaderboard from "../pages/Leaderboard";
@@ -29,7 +28,6 @@ function UserRoutes() {
             <Route path="/" element={<UserLayout></UserLayout>}>
                 <Route index element={<HomePage></HomePage>}></Route>
                 <Route path="home" element={<HomePage ></HomePage>} />
-                <Route path="classes" element={<Classes />} />
                 <Route path="about" element={<About />} />
                 <Route path="contact" element={<Contact />} />
                 <Route path="leaderboard" element={<Leaderboard />} />

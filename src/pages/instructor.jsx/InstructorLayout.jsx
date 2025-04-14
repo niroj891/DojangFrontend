@@ -130,7 +130,7 @@ function InstructorLayout() {
                     {/* Navigation Links */}
                     <nav className="flex-1 space-y-2">
                         <Link
-                            to="/instructor/dashboard"
+                            to="/instructor"
                             className="flex items-center px-4 py-3 text-sm font-medium rounded-lg hover:bg-indigo-600 transition-colors"
                         >
                             <FaHome className="mr-3 text-lg" />

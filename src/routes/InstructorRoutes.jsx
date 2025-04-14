@@ -11,7 +11,7 @@ function InstructorRoutes() {
     return (
         <Routes>
             <Route path="/instructor" element={<InstructorLayout></InstructorLayout>} >
-                <Route path="dashboard" element={<Dashboard></Dashboard>} ></Route>
+                <Route index element={<Dashboard></Dashboard>} ></Route>
                 <Route path="players" element={<Players></Players>}></Route>
                 <Route path="events" element={<Events></Events>}></Route>
                 <Route path="game" element={<TournamentManager></TournamentManager>}></Route>
@@ -21,7 +21,7 @@ function InstructorRoutes() {
 
 
 
-        </Routes>
+        </Routes >
     )
 }
 

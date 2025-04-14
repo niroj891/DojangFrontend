@@ -26,6 +26,7 @@ const TournamentManager = () => {
                 const response = await axios.get('http://localhost:9696/instructor/event', {
                     headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
                 });
+                console.log(response.data)
                 setEvents(response.data);
             } catch (err) {
                 setError('Failed to load events');
@@ -71,21 +72,26 @@ const TournamentManager = () => {
         const fetchTournamentData = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(
-                    `http://localhost:9696/instructor/tournaments/progress?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`
-                    , {
-                        headers:
-                        {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
-                );
-                setMatches(response.data.matches);
-                setRounds(response.data.rounds);
+                const [matchesResponse, resultsResponse, matchResultsResponse] = await Promise.all([
+                    axios.get(
+                        `http://localhost:9696/instructor/matches?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    ),
+                    axios.get(
+                        `http://localhost:9696/instructor/results?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    ),
+                    axios.get(
+                        `http://localhost:9696/instructor/events/${selectedEvent.eventId}/match-results?weightCategory=${selectedWeightCategory}`,
+                        { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
+                    )
+                ]);
 
-                // Set current match if there's an incomplete one
-                const incompleteMatch = response.data.matches.find(
-                    m => m.status === 'IN_PROGRESS' || m.status === 'COMPLETED'
+                setMatches(matchesResponse.data);
+                setResults(resultsResponse.data);
+                setMatchResults(matchResultsResponse.data);
+                const current = matchesResponse.data.find(
+                    m => m.status === 'IN_PROGRESS' || m.status === 'SCHEDULED'
                 );
                 setCurrentMatch(current);
             } catch (err) {
@@ -126,8 +132,9 @@ const TournamentManager = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await axios.post(
-                `http://localhost:9696/instructor/rounds/record?matchId=${currentMatch.id}&winnerId=${winner.id}&loserId=${loser.id}`, {},
+            await axios.post(
+                `http://localhost:9696/instructor/match/result?matchId=${currentMatch.id}&winnerId=${winner.id}&loserId=${loser.id}`,
+                {},
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('jwt')}`
@@ -135,46 +142,19 @@ const TournamentManager = () => {
                 }
             );
 
-            // Refresh data
-            const [participantsResponse, matchesResponse, resultsResponse, matchResultsResponse] = await Promise.all([
+
+            const [participantsRes, matchResultsRes] = await Promise.all([
                 axios.get(
-                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
-                ),
-                axios.get(
-                    `http://localhost:9696/instructor/matches?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
-                ),
-                axios.get(
-                    `http://localhost:9696/instructor/results?eventId=${selectedEvent.eventId}&weightCategory=${selectedWeightCategory}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
+                    `http://localhost:9696/instructor/events/${selectedEvent.eventId}/participants?weightCategory=${selectedWeightCategory}`,
+                    { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
                 ),
                 axios.get(
                     `http://localhost:9696/instructor/events/${selectedEvent.eventId}/match-results?weightCategory=${selectedWeightCategory}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem('jwt')}`
-                        }
-                    }
+                    { headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` } }
                 )
             ]);
-
-            setParticipants(participantsResponse.data);
-            setMatches(matchesResponse.data);
-            setResults(resultsResponse.data);
-            setMatchResults(matchResultsResponse.data);
+            setParticipants(participantsRes.data);
+            setCurrentMatchResult(matchResultsRes.data);
             setCurrentMatch(null);
 
             // Check for tournament completion
@@ -257,8 +237,8 @@ const TournamentManager = () => {
         }
     };
 
-    // Filter participants by status and weight category
-    const getFilteredParticipants = () => {
+    // Filter participants by weight category
+    const getParticipantsByWeightCategory = () => {
         if (!selectedEvent || !selectedWeightCategory) return [];
         return participants.filter(p => p.weightCategory === selectedWeightCategory);
     };
@@ -272,316 +252,430 @@ const TournamentManager = () => {
     };
 
     return (
-        <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-6">Tournament Bracket Manager</h1>
-
-            {/* Status Messages */}
-            {error && (
-                <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-                    {error}
-                </div>
-            )}
-            {success && (
-                <div className="mb-4 p-3 bg-green-100 text-green-700 rounded-md">
-                    {success}
-                </div>
-            )}
-
-            {/* Event Selection */}
-            <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                <h2 className="text-xl font-semibold mb-3">Select Event</h2>
-                <div className="flex flex-wrap gap-2">
-                    {events.map(event => (
-                        <button
-                            key={event.eventId}
-                            onClick={() => {
-                                setSelectedEvent(event);
-                                setSelectedWeightCategory(null);
-                                setCurrentMatch(null);
-                            }}
-                            className={`px-4 py-2 rounded ${selectedEvent?.eventId === event.eventId ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                        >
-                            {event.title}
-                        </button>
-                    ))}
-                </div>
-            </div>
-
-            {selectedEvent && (
-                <div className="mb-6 p-4 bg-gray-100 rounded-lg">
-                    <h2 className="text-xl font-semibold mb-3">Select Weight Category</h2>
-                    <div className="flex flex-wrap gap-2">
-                        {weightCategories.map(category => (
-                            <button
-                                key={category}
-                                onClick={() => setSelectedWeightCategory(category)}
-                                className={`px-4 py-2 rounded ${selectedWeightCategory === category ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
-                            >
-                                {category}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {selectedEvent && selectedWeightCategory && (
-                <div className="space-y-6">
-                    {/* Participants List */}
-                    <div className="p-4 bg-white rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-3">
-                            Participants
-                            {getWinner() && (
-                                <span className="ml-2 text-green-600">Winner: {getWinner().firstName} {getWinner().lastName}</span>
-                            )}
-                        </h2>
-
-                        <div className="mb-4">
-                            <h3 className="font-medium text-lg mb-2">Active Participants (NOT OUT)</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {getParticipantsByWeightCategory()
-                                    .filter(p => p.playerStatus === 'NOTOUT')
-                                    .map(participant => (
-                                        <div key={participant.id} className="p-3 border rounded-lg bg-green-50">
-                                            <p className="font-medium">{participant.firstName} {participant.lastName}</p>
-                                            <p className="text-sm text-gray-600">{participant.dojangName}</p>
-                                            <span className="inline-block mt-1 px-2 py-1 text-xs font-semibold text-green-800 bg-green-200 rounded-full">
-                                                NOT OUT
-                                            </span>
-                                        </div>
-                                    ))}
-                            </div>
+        <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex items-center justify-between mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800">Tournament Sparring Manager</h1>
+                    {selectedEvent && (
+                        <div className="flex items-center">
+                            <span className="text-sm font-medium text-gray-600 mr-2">Selected Event:</span>
+                            <span className="text-base font-semibold text-blue-600">{selectedEvent.title}</span>
                         </div>
+                    )}
+                </div>
 
-                        <div>
-                            <h3 className="font-medium text-lg mb-2">Eliminated Participants (OUT)</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                {getParticipantsByWeightCategory()
-                                    .filter(p => p.playerStatus === 'OUT')
-                                    .map(participant => (
-                                        <div key={participant.id} className="p-3 border rounded-lg bg-gray-50">
-                                            <p className="font-medium">{participant.firstName} {participant.lastName}</p>
-                                            <p className="text-sm text-gray-600">{participant.dojangName}</p>
-                                            <span className="inline-block mt-1 px-2 py-1 text-xs font-semibold text-red-800 bg-red-200 rounded-full">
-                                                OUT
-                                            </span>
-                                        </div>
-                                    ))}
+                {/* Status Messages */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-md shadow-sm">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-medium text-red-800">{error}</p>
                             </div>
                         </div>
                     </div>
+                )}
 
-                    {/* <div className="p-4 bg-white rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-3">Match Results</h2>
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match ID</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="bg-white divide-y divide-gray-200">
-                                    {matchResults.map((match) => (
-                                        <tr key={match.matchId}>
-                                            <td className="px-6 py-4 whitespace-nowrap">{match.matchId}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">{match.roundNumber}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                {new Date(match.matchDate).toLocaleString()}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                    ${match.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                                        match.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
-                                                            'bg-gray-100 text-gray-800'}`}>
-                                                    {match.status}
+                {success && (
+                    <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-md shadow-sm">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <svg className="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm font-medium text-green-800">{success}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Event Selection */}
+                {!selectedEvent ? (
+                    <div className="mb-8 p-6 bg-white rounded-xl shadow-lg">
+                        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Select Tournament Event</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {events.map(event => (
+                                <div key={event.eventId} className="group">
+                                    <div className="relative rounded-xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1">
+                                        <div className="h-48 bg-gray-200 overflow-hidden">
+                                            <img
+                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                                src={`http://localhost:9696/files/images/event/${event.imageUrl}`}
+                                                alt={event.title}
+                                            />
+                                        </div>
+                                        <div className="p-5 bg-white">
+                                            <h3 className="text-xl font-bold mb-2 text-gray-800">{event.title}</h3>
+                                            <button
+                                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                                                onClick={() => {
+                                                    setSelectedEvent(event);
+                                                    setSelectedWeightCategory(null);
+                                                    setCurrentMatch(null);
+                                                }}
+                                            >
+                                                <span>Select Event</span>
+                                                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="space-y-8">
+                        {/* Weight Category Selection */}
+                        <div className="p-6 bg-white rounded-xl shadow-lg">
+                            <h2 className="text-xl font-bold mb-4 text-gray-800">Select Weight Category</h2>
+                            <div className="flex flex-wrap gap-3">
+                                {weightCategories.map(category => (
+                                    <button
+                                        key={category}
+                                        onClick={() => setSelectedWeightCategory(category)}
+                                        className={`px-5 py-2.5 rounded-lg transition-all duration-200 font-medium ${selectedWeightCategory === category
+                                            ? 'bg-blue-600 text-white shadow-md'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {selectedWeightCategory && (
+                            <>
+                                {/* Tournament Controls */}
+                                <div className="p-6 bg-white rounded-xl shadow-lg">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                                        <h2 className="text-xl font-bold text-gray-800">Tournament Controls</h2>
+
+                                        <div className="flex flex-wrap gap-3">
+                                            <button
+                                                onClick={createNewMatch}
+                                                disabled={isLoading || currentMatch || getWinner()}
+                                                className={`flex items-center px-4 py-2 rounded-lg font-medium text-white ${isLoading || currentMatch || getWinner()
+                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                    : 'bg-green-600 hover:bg-green-700'
+                                                    } transition-colors duration-200`}
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        Processing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                                        </svg>
+                                                        Create New Match
+                                                    </>
+                                                )}
+                                            </button>
+
+                                            <button
+                                                onClick={resetTournament}
+                                                disabled={isLoading}
+                                                className={`flex items-center px-4 py-2 rounded-lg font-medium text-white ${isLoading
+                                                    ? 'bg-gray-400 cursor-not-allowed'
+                                                    : 'bg-red-600 hover:bg-red-700'
+                                                    } transition-colors duration-200`}
+                                            >
+                                                {isLoading ? (
+                                                    <>
+                                                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                        </svg>
+                                                        Processing...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                                        </svg>
+                                                        Reset Tournament
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {getWinner() && (
+                                        <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                                            <div className="flex items-center">
+                                                <svg className="w-6 h-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                                </svg>
+                                                <span className="text-lg font-bold text-green-800">
+                                                    Tournament Winner: {getWinner().firstName} {getWinner().lastName} ({getWinner().dojangName})
                                                 </span>
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                {match.winner ? (
-                                                    <div>
-                                                        <div className="font-medium">{match.winner.firstName} {match.winner.lastName}</div>
-                                                        <div className="text-sm text-gray-500">Dojang: {match.winner.dojangName}</div>
-                                                        <div className="text-sm text-gray-500">User: {match.winner.userFirstName || 'N/A'} {match.winner.userLastName || ''}</div>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-gray-400">Not determined</span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 whitespace-nowrap">
-                                                {match.loser ? (
-                                                    <div>
-                                                        <div className="font-medium">{match.loser.firstName} {match.loser.lastName}</div>
-                                                        <div className="text-sm text-gray-500">Dojang: {match.loser.dojangName}</div>
-                                                        <div className="text-sm text-gray-500">User: {match.loser.userFirstName || 'N/A'} {match.loser.userLastName || ''}</div>
-                                                    </div>
-                                                ) : (
-                                                    <span className="text-gray-400">Not determined</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div> */}
-                    {currentMatchResult.length > 0 && (
-                        <div className="p-4 bg-white rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-3">Detailed Match Results</h2>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Date</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner Details</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser Details</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {currentMatchResult.map((match) => (
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
 
-                                            <tr key={match.matchId}>
-                                                <td className="px-6 py-4 whitespace-nowrap">{match.roundNumber}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {new Date(match.matchDate).toLocaleString()}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                        ${match.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
-                                                            match.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
-                                                                'bg-gray-100 text-gray-800'}`}>
-                                                        {match.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {match.winner ? (
-                                                        <div>
-                                                            <div className="font-medium">{match.winner.firstName} {match.winner.lastName}</div>
-                                                            <div className="text-sm text-gray-500">Dojang: {match.winner.dojangName}</div>
-                                                            <div className="text-sm text-gray-500">User ID: {match.winner.userId}</div>
-                                                            <div className="text-sm text-gray-500">Username: {match.winner.username || 'N/A'}</div>
+                                {/* Current Match */}
+                                {currentMatch && (
+                                    <div className="p-6 bg-white rounded-xl shadow-lg">
+                                        <h2 className="text-xl font-bold mb-4 text-gray-800">Current Match</h2>
+                                        <div className="flex flex-col md:flex-row gap-6">
+                                            <div className="flex-1 bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl shadow-sm">
+                                                <div className="text-center mb-4">
+                                                    <h3 className="text-lg font-bold text-gray-800">
+                                                        {currentMatch.player1.firstName} {currentMatch.player1.lastName}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-600">{currentMatch.player1.dojangName}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => recordMatchResult(currentMatch.player1, currentMatch.player2)}
+                                                    disabled={isLoading}
+                                                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm"
+                                                >
+                                                    {isLoading ? 'Processing...' : 'Declare Winner'}
+                                                </button>
+                                            </div>
+
+                                            <div className="flex items-center justify-center">
+                                                <div className="text-xl font-bold text-gray-400">VS</div>
+                                            </div>
+
+                                            <div className="flex-1 bg-gradient-to-br from-red-50 to-red-100 p-6 rounded-xl shadow-sm">
+                                                <div className="text-center mb-4">
+                                                    <h3 className="text-lg font-bold text-gray-800">
+                                                        {currentMatch.player2.firstName} {currentMatch.player2.lastName}
+                                                    </h3>
+                                                    <p className="text-sm text-gray-600">{currentMatch.player2.dojangName}</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => recordMatchResult(currentMatch.player2, currentMatch.player1)}
+                                                    disabled={isLoading}
+                                                    className="w-full py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-sm"
+                                                >
+                                                    {isLoading ? 'Processing...' : 'Declare Winner'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Participants List */}
+                                <div className="p-6 bg-white rounded-xl shadow-lg">
+                                    <h2 className="text-xl font-bold mb-6 text-gray-800">Participants</h2>
+
+                                    <div className="mb-8">
+                                        <div className="flex items-center mb-4">
+                                            <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                                            <h3 className="text-lg font-medium text-gray-800">Active Participants</h3>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {getParticipantsByWeightCategory()
+                                                .filter(p => p.playerStatus === 'NOTOUT')
+                                                .map(participant => (
+                                                    <div
+                                                        key={participant.id}
+                                                        className="p-4 border border-green-200 bg-green-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                                                    >
+                                                        <p className="font-bold text-gray-800">{participant.firstName} {participant.lastName}</p>
+                                                        <p className="text-sm text-gray-600 mt-1">{participant.dojangName}</p>
+                                                        <div className="mt-2 flex items-center">
+                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                                                                </svg>
+                                                                ACTIVE
+                                                            </span>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-gray-400">Not determined</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {match.loser ? (
-                                                        <div>
-                                                            <div className="font-medium">{match.loser.firstName} {match.loser.lastName}</   div>
-                                                            <div className="text-sm text-gray-500">Dojang: {match.loser.dojangName}</div>
-                                                            <div className="text-sm text-gray-500">User ID: {match.loser.userId}</div>
-                                                            <div className="text-sm text-gray-500">Username: {match.loser.username || 'N/A'}</div>
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="flex items-center mb-4">
+                                            <div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
+                                            <h3 className="text-lg font-medium text-gray-800">Eliminated Participants</h3>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                            {getParticipantsByWeightCategory()
+                                                .filter(p => p.playerStatus === 'OUT')
+                                                .map(participant => (
+                                                    <div
+                                                        key={participant.id}
+                                                        className="p-4 border border-gray-200 bg-gray-50 rounded-lg shadow-sm"
+                                                    >
+                                                        <p className="font-bold text-gray-600">{participant.firstName} {participant.lastName}</p>
+                                                        <p className="text-sm text-gray-500 mt-1">{participant.dojangName}</p>
+                                                        <div className="mt-2 flex items-center">
+                                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path>
+                                                                </svg>
+                                                                ELIMINATED
+                                                            </span>
                                                         </div>
-                                                    ) : (
-                                                        <span className="text-gray-400">Not determined</span>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
+                                                    </div>
+                                                ))}
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {/* Match Controls */}
-                    <div className="p-4 bg-white rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-3">Match Controls</h2>
-                        <div className="flex flex-wrap gap-4 items-center">
-                            <button
-                                onClick={createNewMatch}
-                                disabled={isLoading || currentMatch || getWinner()}
-                                className="px-4 py-2 bg-green-600 text-white rounded disabled:opacity-50"
-                            >
-                                {isLoading ? 'Processing...' : 'Create New Match'}
-                            </button>
+                                {/* Match Results */}
+                                {currentMatchResult.length > 0 && (
+                                    <div className="p-6 bg-white rounded-xl shadow-lg overflow-hidden">
+                                        <h2 className="text-xl font-bold mb-4 text-gray-800">Match History</h2>
+                                        <div className="overflow-x-auto">
+                                            <table className="min-w-full divide-y divide-gray-200">
+                                                <thead>
+                                                    <tr>
 
-                            <button
-                                onClick={resetTournament}
-                                disabled={isLoading}
-                                className="px-4 py-2 bg-red-600 text-white rounded disabled:opacity-50"
-                            >
-                                {isLoading ? 'Processing...' : 'Reset Tournament'}
-                            </button>
+                                                        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Round</th>
+                                                        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match Date</th>
+                                                        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                                        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
+                                                        <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="bg-white divide-y divide-gray-200">
+                                                    {currentMatchResult.map((match) => (
+                                                        <tr key={match.matchId} className="hover:bg-gray-50">
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">{match.roundNumber}</td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                                {new Date(match.matchDate).toLocaleString()}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                                    ${match.status === 'COMPLETED' ? 'bg-green-100 text-green-800' :
+                                                                        match.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
+                                                                            'bg-blue-100 text-blue-800'}`}>
+                                                                    {match.status}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                {match.winner ? (
+                                                                    <div className="flex items-center">
+                                                                        <div className="w-8 h-8 flex-shrink-0 mr-3 bg-green-100 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                                <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                        <div>
+                                                                            <div className="text-sm font-medium text-gray-800">{match.winner.firstName} {match.winner.lastName}</div>
+                                                                            <div className="text-xs text-gray-500">{match.winner.dojangName}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-sm text-gray-400">Not determined</span>
+                                                                )}
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                {match.loser ? (
+                                                                    <div className="flex items-center">
+                                                                        <div className="w-8 h-8 flex-shrink-0 mr-3 bg-gray-100 rounded-full flex items-center justify-center">
+                                                                            <svg className="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"></path>
+                                                                            </svg>
+                                                                        </div>
+                                                                        <div>
+                                                                            <div className="text-sm font-medium text-gray-800">{match.loser.firstName} {match.loser.lastName}</div>
+                                                                            <div className="text-xs text-gray-500">{match.loser.dojangName}</div>
+                                                                        </div>
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-sm text-gray-400">Not determined</span>
+                                                                )}
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Tournament Results */}
+                                {results.length > 0 && (
+                                    <div className="p-6 bg-white rounded-xl shadow-lg">
+                                        <h2 className="text-xl font-bold mb-4 text-gray-800">Tournament Results</h2>
+                                        <div className="overflow-x-auto">
+                                            <table className="min-w-full bg-white rounded-lg overflow-hidden">
+                                                <thead className="bg-gray-50">
+                                                    <tr>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
+                                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-gray-200">
+                                                    {results.map(result => (
+                                                        <tr key={result.id} className="hover:bg-gray-50 transition-colors duration-150">
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-800">Match {result.match.id}</td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex items-center">
+                                                                    <div className="flex-shrink-0 h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
+                                                                        <svg className="h-4 w-4 text-green-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
+                                                                        </svg>
+                                                                    </div>
+                                                                    <div className="ml-3">
+                                                                        <div className="text-sm font-medium text-gray-800">{result.winner.firstName} {result.winner.lastName}</div>
+                                                                        <div className="text-xs text-gray-500">{result.winner.dojangName}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <div className="flex items-center">
+                                                                    <div className="flex-shrink-0 h-8 w-8 bg-gray-100 rounded-full flex items-center justify-center">
+                                                                        <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd"></path>
+                                                                        </svg>
+                                                                    </div>
+                                                                    <div className="ml-3">
+                                                                        <div className="text-sm font-medium text-gray-800">{result.loser.firstName} {result.loser.lastName}</div>
+                                                                        <div className="text-xs text-gray-500">{result.loser.dojangName}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Loading overlay */}
+                {isLoading && (
+                    <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg flex items-center">
+                            <svg className="animate-spin h-6 w-6 text-blue-600 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <span className="text-gray-700 font-medium">Loading...</span>
                         </div>
                     </div>
-
-                    {/* Current Match */}
-                    {currentMatch && (
-                        <div className="p-4 bg-white rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-3">Current Match</h2>
-                            <div className="grid grid-cols-2 gap-6">
-                                <div className="p-4 border rounded-lg text-center">
-                                    <h3 className="font-medium text-lg">
-                                        {currentMatch.player1.firstName} {currentMatch.player1.lastName}
-                                    </h3>
-                                    <p className="text-sm text-gray-600">{currentMatch.player1.dojangName}</p>
-                                    <button
-                                        onClick={() => recordMatchResult(currentMatch.player1, currentMatch.player2)}
-                                        disabled={isLoading}
-                                        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-                                    >
-                                        {isLoading ? 'Processing...' : 'Winner'}
-                                    </button>
-                                </div>
-
-                                <div className="p-4 border rounded-lg text-center">
-                                    <h3 className="font-medium text-lg">
-                                        {currentMatch.player2.firstName} {currentMatch.player2.lastName}
-                                    </h3>
-                                    <p className="text-sm text-gray-600">{currentMatch.player2.dojangName}</p>
-                                    <button
-                                        onClick={() => recordMatchResult(currentMatch.player2, currentMatch.player1)}
-                                        disabled={isLoading}
-                                        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
-                                    >
-                                        {isLoading ? 'Processing...' : 'Winner'}
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Tournament Results */}
-                    {results.length > 0 && (
-                        <div className="p-4 bg-white rounded-lg shadow">
-                            <h2 className="text-xl font-semibold mb-3">Match Results</h2>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Winner</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loser</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {results.map(result => (
-                                            <tr key={result.id}>
-                                                <td className="px-6 py-4 whitespace-nowrap">Match {result.match.id}</td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {result.winner.firstName} {result.winner.lastName}
-                                                </td>
-                                                <td className="px-6 py-4 whitespace-nowrap">
-                                                    {result.loser.firstName} {result.loser.lastName}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    )}
-
-
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };
