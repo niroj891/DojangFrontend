@@ -11,7 +11,7 @@ import GroupIcon from "@mui/icons-material/Group";
 import ChatIcon from '@mui/icons-material/Chat';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useRecoilState } from "recoil";
-import { isLogin, userInformationSelector } from "../recoil/user";
+import { isLogin, userInformationSelector } from "../../recoil/user";
 
 const Profile = () => {
     const navigate = useNavigate();

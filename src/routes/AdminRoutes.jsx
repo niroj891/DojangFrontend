@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom"
-import { AdminDashboard, Dashboard, UserDetails, UserList } from "../pages/AdminDashboard"
+import { AdminDashboard, Dashboard, UserDetails, UserList } from "../pages/Admin/AdminDashboard"
 
 function AdminRoutes() {
     return (

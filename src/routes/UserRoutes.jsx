@@ -1,16 +1,17 @@
 import { Route, Routes } from "react-router-dom";
 import RegisterPage from "../Authentication/Register";
 import About from "../pages/About";
-import Contact from "../pages/Contact";
-import Events from "../pages/Events";
+import Contact from "../pages/Contact/Contact";
+import Events from "../pages/Events/Events";
 import LoginPage from "../Authentication/Login";
-import Leaderboard from "../pages/Leaderboard";
+import Leaderboard from "../pages/Leaderboard/Leaderboard";
 import Community from "../pages/Community";
 import UserLayout from "../Layout";
 import ProfilePage from "../Component/ProfilePage";
-import Profile from "../pages/Profile";
-import RegistrationForm from "../pages/RegistrationForm";
-import HomePage from "../pages/HomePage";
+import Profile from "../pages/Profile/Profile";
+import RegistrationForm from "../Component/RegistrationForm";
+import HomePage from "../pages/Homepage/HomePage";
+import CreatePostModal from "../pages/CreatePost/CreatePostModal";
 
 
 
@@ -37,6 +38,7 @@ function UserRoutes() {
                 <Route path="register" element={<RegisterPage />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="events/:eventId/register" element={<RegistrationForm />} />
+                <Route path="post" element={<CreatePostModal />} />
 
 
             </Route>

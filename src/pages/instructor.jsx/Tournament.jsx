@@ -18,6 +18,7 @@ const TournamentManager = () => {
 
     const weightCategories = ['BELOW54', 'BELOW58', 'BELOW63', 'BELOW68'];
 
+
     // Fetch events on component mount
     useEffect(() => {
         const fetchEvents = async () => {
@@ -26,8 +27,15 @@ const TournamentManager = () => {
                 const response = await axios.get('http://localhost:9696/instructor/event', {
                     headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` }
                 });
-                console.log(response.data)
-                setEvents(response.data);
+
+                // Sort events by creation date (newest first)
+                const sortedEvents = [...response.data].sort((a, b) => {
+                    const dateA = new Date(a.createdAt || a.startDate || a.date || Date.now());
+                    const dateB = new Date(b.createdAt || b.startDate || b.date || Date.now());
+                    return dateB - dateA;
+                });
+
+                setEvents(sortedEvents);
             } catch (err) {
                 setError('Failed to load events');
             } finally {
@@ -36,6 +44,7 @@ const TournamentManager = () => {
         };
         fetchEvents();
     }, []);
+
 
     // Fetch participants when event AND weight category are selected
     useEffect(() => {

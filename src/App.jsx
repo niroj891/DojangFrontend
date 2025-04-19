@@ -1,6 +1,6 @@
 
 import { TablePagination } from '@mui/material'
-import HomePage from './pages/HomePage.jsx';
+import HomePage from './pages/Homepage/HomePage.jsx';
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import Footer from './Component/Footer.jsx'
 import UserRoutes from './routes/UserRoutes.jsx';

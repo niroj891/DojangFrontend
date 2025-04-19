@@ -99,7 +99,7 @@ export default function Contact() {
                 <h2 className="text-2xl font-semibold text-gray-900 mb-4">Send a message</h2>
                 {submissionStatus && (
                     <div className={`mb-4 p-3 rounded-lg ${submissionStatus.includes('successfully') ?
-                            'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
                         }`}>
                         {submissionStatus}
                     </div>

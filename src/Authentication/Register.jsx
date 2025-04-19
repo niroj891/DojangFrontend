@@ -1,9 +1,10 @@
-import axios from "axios";
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { API_BASE_URL } from "../config/api";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
-const RegisterPage = () => {
+
+export default function RegisterPage() {
     const [formData, setFormData] = useState({
         firstName: "",
         lastName: "",
@@ -11,7 +12,8 @@ const RegisterPage = () => {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "USER", // Added role field with default value
+        role: "USER",
+        gender: "",
     });
 
     const [errors, setErrors] = useState({});
@@ -76,9 +78,12 @@ const RegisterPage = () => {
             newErrors.confirmPassword = "Passwords do not match";
         }
 
-        // Validate role
         if (!formData.role) {
             newErrors.role = "Please select a role";
+        }
+
+        if (!formData.gender) {
+            newErrors.gender = "Please select a gender";
         }
 
         setErrors(newErrors);
@@ -94,6 +99,7 @@ const RegisterPage = () => {
 
         setIsLoading(true);
 
+
         try {
             const response = await axios.post(`${API_BASE_URL}/auth/signup`, {
                 firstName: formData.firstName,
@@ -101,9 +107,11 @@ const RegisterPage = () => {
                 phoneNumber: formData.phoneNumber,
                 email: formData.email,
                 password: formData.password,
+                gender: formData.gender,
                 role: formData.role, // Added role to the request body
             });
 
+            console.log(response)
             setMessage(`Registration successful! Welcome, ${response.data.firstName}. Redirecting to login...`);
             setMessageType("success");
 
@@ -117,11 +125,13 @@ const RegisterPage = () => {
                 role: "USER",
             });
 
+
             setTimeout(() => {
                 navigate("/login");
             }, 2000);
 
         } catch (error) {
+            console.log(error)
             setMessage(
                 error.response?.data?.message || "Registration failed. Please try again."
             );
@@ -131,19 +141,26 @@ const RegisterPage = () => {
         }
     };
 
+    const getPasswordStrength = () => {
+        if (!formData.password) return "";
+        if (formData.password.length >= 12) return "Strong";
+        if (formData.password.length >= 8) return "Good";
+        return "Weak";
+    };
+
     return (
-        <div className="flex flex-col md:flex-row min-h-[75vh] justify-center items-center bg-gray-50">
-            {/* Left Section: Registration Form */}
-            <div className=" md:w-1/2 lg:w-2/5 px-4 py-4 md:py-2 mt-14 ">
-                <div className="max-w- mx-auto bg-white rounded-xl shadow-md overflow-hidden p-4 md:p-2">
-                    <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Create an Account</h2>
-                    <p className="text-gray-600 mb-3 text-center">Join our Taekwondo community today</p>
+        <div className="flex flex-col md:flex-row min-h-screen bg-gray-50">
+            {/* Left Section: Form */}
+            <div className="md:w-1/2 lg:w-2/5 px-4 py-4 md:py-2 mt-8">
+                <div className="max-w-lg mx-auto bg-white rounded-2xl shadow-lg overflow-hidden p-6">
+                    <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-600">Create an Account</h2>
+                    <p className="text-gray-600 mb-6 text-center">Join our Taekwondo community today</p>
 
                     {message && (
                         <div
-                            className={`mb-4 p-3 rounded-lg text-sm ${messageType === "success"
-                                ? "bg-green-100 text-green-700 border border-green-200"
-                                : "bg-red-100 text-red-700 border border-red-200"
+                            className={`mb-6 p-4 rounded-lg text-sm ${messageType === "success"
+                                ? "bg-green-50 text-green-700 border-l-4 border-green-500"
+                                : "bg-red-50 text-red-700 border-l-4 border-red-500"
                                 }`}
                         >
                             {message}
@@ -151,7 +168,7 @@ const RegisterPage = () => {
                     )}
 
                     <form className="space-y-5" onSubmit={handleRegister}>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
                                 <input
@@ -159,7 +176,8 @@ const RegisterPage = () => {
                                     name="firstName"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-2 border ${errors.firstName ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                    className={`w-full px-4 py-3 border ${errors.firstName ? "border-red-500" : "border-gray-200"
+                                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors`}
                                     placeholder="First Name"
                                 />
                                 {errors.firstName && <p className="mt-1 text-xs text-red-500">{errors.firstName}</p>}
@@ -171,7 +189,8 @@ const RegisterPage = () => {
                                     name="lastName"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    className={`w-full px-4 py-2 border ${errors.lastName ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                    className={`w-full px-4 py-3 border ${errors.lastName ? "border-red-500" : "border-gray-200"
+                                        } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors`}
                                     placeholder="Last Name"
                                 />
                                 {errors.lastName && <p className="mt-1 text-xs text-red-500">{errors.lastName}</p>}
@@ -185,35 +204,76 @@ const RegisterPage = () => {
                                 name="phoneNumber"
                                 value={formData.phoneNumber}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 border ${errors.phoneNumber ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                className={`w-full px-4 py-3 border ${errors.phoneNumber ? "border-red-500" : "border-gray-200"
+                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors`}
                                 placeholder="(123) 456-7890"
                             />
                             {errors.phoneNumber && <p className="mt-1 text-xs text-red-500">{errors.phoneNumber}</p>}
                         </div>
 
-                        {/* Added Role Selection */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Gender</label>
+                            <div className="grid grid-cols-2 gap-3 mt-1">
+                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.gender === 'MALE'
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                    }`}>
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="MALE"
+                                        checked={formData.gender === "MALE"}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="ml-2 text-sm">Male</span>
+                                </label>
+                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.gender === 'FEMALE'
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                    }`}>
+                                    <input
+                                        type="radio"
+                                        name="gender"
+                                        value="FEMALE"
+                                        checked={formData.gender === "FEMALE"}
+                                        onChange={handleChange}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                                    />
+                                    <span className="ml-2 text-sm">Female</span>
+                                </label>
+                            </div>
+                            {errors.gender && <p className="mt-1 text-xs text-red-500">{errors.gender}</p>}
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Register As</label>
                             <div className="grid grid-cols-2 gap-3 mt-1">
-                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer ${formData.role === 'USER' ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
+                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.role === 'USER'
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                    }`}>
                                     <input
                                         type="radio"
                                         name="role"
                                         value="USER"
                                         checked={formData.role === "USER"}
                                         onChange={handleChange}
-                                        className="h-4 w-4 text-blue-400 focus:ring-blue-400"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="ml-2 text-sm">User</span>
                                 </label>
-                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer ${formData.role === 'INSTRUCTOR' ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}>
+                                <label className={`flex items-center p-3 border rounded-lg cursor-pointer transition-all duration-200 ${formData.role === 'INSTRUCTOR'
+                                    ? 'border-blue-500 bg-blue-50'
+                                    : 'border-gray-200 hover:border-gray-300'
+                                    }`}>
                                     <input
                                         type="radio"
                                         name="role"
                                         value="INSTRUCTOR"
                                         checked={formData.role === "INSTRUCTOR"}
                                         onChange={handleChange}
-                                        className="h-4 w-4 text-blue-400 focus:ring-blue-400"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                                     />
                                     <span className="ml-2 text-sm">Instructor</span>
                                 </label>
@@ -228,7 +288,8 @@ const RegisterPage = () => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 border ${errors.email ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                className={`w-full px-4 py-3 border ${errors.email ? "border-red-500" : "border-gray-200"
+                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors`}
                                 placeholder="your.email@example.com"
                             />
                             {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
@@ -241,12 +302,32 @@ const RegisterPage = () => {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 border ${errors.password ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                className={`w-full px-4 py-3 border ${errors.password ? "border-red-500" : "border-gray-200"
+                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors`}
                                 placeholder="••••••••"
                             />
                             {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
                             {formData.password && !errors.password && (
-                                <p className="mt-1 text-xs text-gray-500">Password strength: {formData.password.length >= 12 ? "Strong" : formData.password.length >= 8 ? "Good" : "Weak"}</p>
+                                <div className="mt-2 flex items-center">
+                                    <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                        <div
+                                            className={`h-1.5 rounded-full ${getPasswordStrength() === "Strong"
+                                                ? "bg-green-500 w-full"
+                                                : getPasswordStrength() === "Good"
+                                                    ? "bg-yellow-500 w-2/3"
+                                                    : "bg-red-500 w-1/3"
+                                                }`}>
+                                        </div>
+                                    </div>
+                                    <span className={`ml-2 text-xs ${getPasswordStrength() === "Strong"
+                                        ? "text-green-600"
+                                        : getPasswordStrength() === "Good"
+                                            ? "text-yellow-600"
+                                            : "text-red-600"
+                                        }`}>
+                                        {getPasswordStrength()}
+                                    </span>
+                                </div>
                             )}
                         </div>
 
@@ -257,7 +338,8 @@ const RegisterPage = () => {
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleChange}
-                                className={`w-full px-4 py-2 border ${errors.confirmPassword ? "border-red-500" : "border-gray-300"} rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none transition-colors`}
+                                className={`w-full px-4 py-3 border ${errors.confirmPassword ? "border-red-500" : "border-gray-200"
+                                    } rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none transition-colors`}
                                 placeholder="••••••••"
                             />
                             {errors.confirmPassword && <p className="mt-1 text-xs text-red-500">{errors.confirmPassword}</p>}
@@ -267,7 +349,7 @@ const RegisterPage = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full bg-blue-400 text-white py-3 px-4 rounded-lg hover:bg-blue-500 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors font-medium flex items-center justify-center"
+                                className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3 px-4 rounded-lg hover:from-blue-600 hover:to-indigo-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors font-medium flex items-center justify-center"
                             >
                                 {isLoading ? (
                                     <>
@@ -294,22 +376,38 @@ const RegisterPage = () => {
             </div>
 
             {/* Right Section: Taekwondo Image */}
-            <div className=" md:block w-1/2 lg:w-2.5/5 h-[80vh]">
-                <div className="h-full w-full relative overflow-hidden bg-gray-100 rounded-l-xl">
+            <div className="hidden md:block w-1/2 lg:w-3/5 h-screen">
+                <div className="h-full w-full relative overflow-hidden mt-10 bg-gray-100">
                     <img
                         src="/image/TaekwondoRegister.jpg"
                         alt="Taekwondo training"
                         className="w-full h-full object-cover object-center"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400/30 to-transparent"></div>
-                    <div className="absolute bottom-0 left-0 p-8 md:p-10 text-black max-w-md">
-                        <h3 className="text-2xl font-bold mb-2 drop-shadow-md">Join Our Taekwondo Community</h3>
-                        <p className="text-sm drop-shadow-md">Discover the benefits of training with our experienced instructors in a supportive environment.</p>
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-900/50 to-black/30"></div>
+                    <div className="absolute bottom-0 left-0 p-10 text-white max-w-lg">
+                        <div className="inline-block p-2 bg-blue-500/20 backdrop-blur-sm rounded-lg mb-4">
+                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12,2L1,21H23L12,2M12,6L19.5,19H4.5L12,6Z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-3xl font-bold mb-3 drop-shadow-md">Join Our Taekwondo Community</h3>
+                        <p className="text-lg text-gray-100 drop-shadow-md mb-6">
+                            Discover the benefits of training with experienced instructors in a supportive environment.
+                            Build discipline, strength, and confidence.
+                        </p>
+                        <div className="flex items-center space-x-4">
+                            <div className="flex -space-x-2">
+                                <img className="w-8 h-8 rounded-full border-2 border-white" src="/api/placeholder/32/32" alt="Student" />
+                                <img className="w-8 h-8 rounded-full border-2 border-white" src="/api/placeholder/32/32" alt="Student" />
+                                <img className="w-8 h-8 rounded-full border-2 border-white" src="/api/placeholder/32/32" alt="Student" />
+                            </div>
+                            <div className="text-sm text-white">
+                                Join <span className="font-bold">500+</span> members
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-};
-
-export default RegisterPage;
+}

@@ -1,6 +1,6 @@
 import React from 'react';
-import Testimonial from '../Component/Testimonial';
-import UpcomingEvents from '../Component/UpcomingEvents';
+import Testimonial from '../../Component/Testimonial';
+import UpcomingEvents from '../../Component/UpcomingEvents';
 
 const HomePage = () => {
     return (

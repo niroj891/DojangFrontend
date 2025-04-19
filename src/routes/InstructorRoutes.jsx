@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import InstructorLayout, { Dashboard, Players } from "../pages/instructor.jsx/InstructorLayout";
 import ErrorPage from "../pages/instructor.jsx/Error";
 import Events from "../pages/instructor.jsx/Events";
-import RegistrationForm from "../pages/RegistrationForm";
+import RegistrationForm from "../Component/RegistrationForm";
 import TournamentManager from "../pages/instructor.jsx/Tournament";
 
 function InstructorRoutes() {

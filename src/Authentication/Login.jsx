@@ -49,26 +49,55 @@ const LoginPage = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <Paper elevation={3} className="flex w-full max-w-4xl rounded-lg overflow-hidden shadow-lg opacity-90">
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-b from-blue-50 to-blue-100">
+            {/* Decorative belt elements at top and bottom */}
+            <div className="absolute top-0 w-full h-6 bg-black"></div>
+            <div className="absolute top-6 w-full h-4 bg-red-600"></div>
+
+
+            <Paper elevation={5} className="flex w-full max-w-4xl rounded-lg overflow-hidden shadow-xl opacity-95 border-2 border-gray-200">
                 {/* Left Side - Image */}
-                <div className="hidden md:flex w-1/2 bg-cover bg-center" style={{ backgroundImage: "url('/image/TaekwondoLogin.png.jpg')" }}>
+                <div className="hidden md:flex w-1/2 bg-cover bg-center relative">
                     <img
                         src="/image/TaekwondoLogin.png.jpg"
                         alt="Taekwondo"
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover"
                     />
+                    {/* Overlay with Taekwondo principles */}
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center text-white p-6">
+                        <Typography variant="h5" className="mb-4 font-bold">Taekwondo Tenets</Typography>
+                        <div className="text-center space-y-2">
+                            <p className="border-b border-red-500 pb-1">Courtesy</p>
+                            <p className="border-b border-red-500 pb-1">Discipline</p>
+                            <p className="border-b border-red-500 pb-1">Perseverance</p>
+                            <p className="border-b border-red-500 pb-1">Self-Control</p>
+                            <p className="border-b border-red-500 pb-1">Dedication</p>
+                        </div>
+                    </div>
                 </div>
                 <Divider orientation="vertical" flexItem className="hidden md:block bg-gray-300 w-[1px]" />
 
                 {/* Right Side - Login Form */}
-                <div className="w-full md:w-1/2 p-6 sm:p-10 bg-white flex flex-col justify-center">
-                    <Box textAlign="center" mb={3}>
-                        <Typography variant="h4" component="h1" className="text-blue-500 font-bold">
-                            Dojang
+                <div className="w-full md:w-1/2 p-6 sm:p-10 bg-white flex flex-col justify-center relative">
+                    {/* Decorative belt corner */}
+                    <div className="absolute top-0 right-0 w-20 h-20">
+                        <div className="absolute top-0 right-0 w-full h-8 bg-black"></div>
+                        <div className="absolute top-8 right-0 w-full h-4 bg-red-600"></div>
+                    </div>
+
+                    <Box textAlign="center" mb={4}>
+                        <div className="flex justify-center items-center mb-2 rounded-full ">
+                            <img
+                                src="/image/Taekwondo logo.png"
+                                alt="Dojang Logo"
+                                className="w-12 h-12 object-contain group-hover:scale-110 transition-transform duration-300"
+                            />
+                        </div>
+                        <Typography variant="h4" component="h1" className="text-red-600 font-bold">
+                            DOJANG
                         </Typography>
-                        <Typography variant="subtitle1" className="text-gray-500">
-                            Welcome to the world of Taekwondo
+                        <Typography variant="subtitle1" className="text-gray-600">
+                            Welcome to the path of Taekwondo
                         </Typography>
                     </Box>
 
@@ -101,11 +130,19 @@ const LoginPage = () => {
                                         className="bg-white rounded-md"
                                         error={authError?.isUsernameError}
                                         helperText={authError?.isUsernameError ? "" : null}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: '#dc2626',
+                                            },
+                                            '& .MuiInputLabel-root.Mui-focused': {
+                                                color: '#dc2626',
+                                            }
+                                        }}
                                     />
                                     <ErrorMessage
                                         name="email"
                                         component="div"
-                                        className="text-red-500"
+                                        className="text-red-500 text-sm mt-1"
                                     />
                                 </div>
 
@@ -122,11 +159,19 @@ const LoginPage = () => {
                                         className="bg-white rounded-md"
                                         error={authError && !authError.isUsernameError}
                                         helperText={authError && !authError.isUsernameError ? "" : null}
+                                        sx={{
+                                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                borderColor: '#dc2626',
+                                            },
+                                            '& .MuiInputLabel-root.Mui-focused': {
+                                                color: '#dc2626',
+                                            }
+                                        }}
                                     />
                                     <ErrorMessage
                                         name="password"
                                         component="div"
-                                        className="text-red-500"
+                                        className="text-red-500 text-sm mt-1"
                                     />
                                 </div>
 
@@ -134,21 +179,51 @@ const LoginPage = () => {
                                     type="submit"
                                     fullWidth
                                     variant="contained"
-                                    className="bg-red-600 hover:bg-lime-700 text-white py-2 px-4 rounded-lg"
+                                    className="bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-medium"
                                     disabled={isSubmitting}
+                                    sx={{
+                                        backgroundColor: '#dc2626',
+                                        '&:hover': {
+                                            backgroundColor: '#b91c1c',
+                                        },
+                                        textTransform: 'none',
+                                        fontSize: '1rem',
+                                        fontWeight: '500',
+                                        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                                    }}
                                 >
-                                    {isSubmitting ? "Logging in..." : "Login"}
+                                    {isSubmitting ? "Logging in..." : "Enter the Dojang"}
                                 </Button>
                             </Form>
                         )}
                     </Formik>
 
-                    <Typography variant="body2" className="text-center mt-4 text-gray-500">
-                        Don't have account ?
-                        <Button onClick={() => navigate("/register")} size="small">
-                            SignUp
+                    <Typography variant="body2" className="text-center mt-6 text-gray-600">
+                        New to Taekwondo?
+                        <Button
+                            onClick={() => navigate("/register")}
+                            size="small"
+                            sx={{
+                                color: '#dc2626',
+                                '&:hover': {
+                                    backgroundColor: 'rgba(220, 38, 38, 0.04)',
+                                },
+                                fontWeight: '500',
+                            }}
+                        >
+                            Begin Your Journey
                         </Button>
                     </Typography>
+
+                    {/* Decorative belt element at bottom */}
+                    <div className="mt-8 border-t border-gray-200 pt-4">
+                        <div className="flex justify-center">
+                            <div className="w-12 h-3 bg-black rounded-full mb-1"></div>
+                        </div>
+                        <div className="flex justify-center">
+                            <div className="w-12 h-2 bg-red-600 rounded-full"></div>
+                        </div>
+                    </div>
                 </div>
             </Paper>
         </div>

@@ -1,3 +1,4 @@
+import { CircularProgress } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -203,7 +204,7 @@ const Events = () => {
             <div className="flex">
                 <Sidebar filter={filter} setFilter={setFilter} />
                 <div className="flex-grow p-6 flex items-center justify-center">
-                    <p>Loading events...</p>
+                    <CircularProgress></CircularProgress>
                 </div>
             </div>
         );

@@ -69,7 +69,7 @@ const RegistrationForm = () => {
                 // Optionally navigate after a delay to let user see the success message
                 setTimeout(() => {
                     navigate('/events', { state: { registrationSuccess: true } });
-                }, 4000);
+                }, 2000);
             } else {
 
                 const errormessage = "User already exists";
