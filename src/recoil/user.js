@@ -10,7 +10,8 @@ const userInformationAtom = atom({
         email: null,
         image: null,
         gender: null,
-        role: null
+        role: null,
+        image: null,
     }
 })
 

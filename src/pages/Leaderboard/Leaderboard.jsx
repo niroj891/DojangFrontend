@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, Typography, Grid, CircularProgress } from "@mui/material";
-import { FaMedal, FaTrophy, FaUniversity } from "react-icons/fa";
+import { Card, CardContent, Typography, Grid, CircularProgress, Pagination, Button, Menu, MenuItem } from "@mui/material";
+import { FaMedal, FaTrophy, FaUniversity, FaSort, FaCalendarAlt } from "react-icons/fa";
 import { GiBlackBelt } from "react-icons/gi";
 import axios from "axios";
 
@@ -42,10 +42,22 @@ const getRandomImage = (id) => {
     return `https://randomuser.me/api/portraits/${gender}/${id % 100}.jpg`;
 };
 
+const getUserImage = (user) => {
+    if (user.imageUrl) {
+        return `http://localhost:9696/images/user/${user.imageUrl}`;
+    }
+    return getRandomImage(user.participation?.id || 1);
+};
+
 const Leaderboard = () => {
     const [winnerGroups, setWinnerGroups] = useState([]);
+    const [filteredGroups, setFilteredGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [page, setPage] = useState(1);
+    const [itemsPerPage] = useState(3);
+    const [sortOrder, setSortOrder] = useState('newest');
+    const [anchorEl, setAnchorEl] = useState(null);
 
     useEffect(() => {
         const fetchLeaderboard = async () => {
@@ -53,7 +65,7 @@ const Leaderboard = () => {
                 const response = await axios.get('http://localhost:9696/leaderboard');
                 const data = response.data;
 
-                // Filter out empty arrays and process each group
+                // Process groups
                 const processedGroups = data
                     .filter(group => group && group.length >= 3)
                     .map(group => ({
@@ -71,10 +83,12 @@ const Leaderboard = () => {
                         },
                         weightCategory: group[0].participation?.weightCategory || "Open Weight",
                         eventName: group[0].event || "Taekwondo Championship",
-                        instructorName: group[0].instructor || "Master Instructor"
+                        instructorName: group[0].instructor || "Master Instructor",
+                        eventDate: group[0].eventDate ? new Date(group[0].eventDate) : new Date(0) // Default to epoch if no date
                     }));
 
                 setWinnerGroups(processedGroups);
+                sortGroups(processedGroups, sortOrder);
             } catch (err) {
                 setError(err.message);
                 console.error("Error fetching leaderboard:", err);
@@ -85,6 +99,39 @@ const Leaderboard = () => {
 
         fetchLeaderboard();
     }, []);
+
+    const sortGroups = (groups, order) => {
+        const sorted = [...groups].sort((a, b) => {
+            if (order === 'newest') {
+                return b.eventDate - a.eventDate;
+            } else {
+                return a.eventDate - b.eventDate;
+            }
+        });
+        setFilteredGroups(sorted);
+        setPage(1); // Reset to first page when sorting changes
+    };
+
+    const handleSortChange = (order) => {
+        setSortOrder(order);
+        sortGroups(winnerGroups, order);
+        setAnchorEl(null);
+    };
+
+    const handleMenuOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleMenuClose = () => {
+        setAnchorEl(null);
+    };
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredGroups.length / itemsPerPage);
+    const paginatedGroups = filteredGroups.slice(
+        (page - 1) * itemsPerPage,
+        page * itemsPerPage
+    );
 
     const renderWinnerCard = (winner, rank) => {
         const { icon, bgColor, borderColor, badgeColor } = getRankStyle(rank);
@@ -112,12 +159,12 @@ const Leaderboard = () => {
                 <div className="flex flex-col items-center p-4">
                     <div className="relative mb-2">
                         <img
-                            src={getRandomImage(id || 1)}
+                            src={getUserImage(winner)}
                             alt={`${firstName || "Winner"} ${lastName || ""}`}
                             className={`w-28 h-28 object-cover rounded-full border-4 ${borderColor} shadow-md`}
                             onError={(e) => {
                                 e.target.onerror = null;
-                                e.target.src = "https://via.placeholder.com/150";
+                                e.target.src = getRandomImage(id || 1);
                             }}
                         />
                         <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-md">
@@ -205,7 +252,35 @@ const Leaderboard = () => {
                     </Typography>
                 </div>
 
-                {winnerGroups.map((group, index) => (
+                {/* Sorting controls */}
+                <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center space-x-2">
+                        <FaCalendarAlt className="text-blue-600" />
+                        <Typography variant="body1" className="text-gray-600">
+                            {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
+                        </Typography>
+                    </div>
+                    <div>
+                        <Button
+                            variant="outlined"
+                            startIcon={<FaSort />}
+                            onClick={handleMenuOpen}
+                            className="border-blue-600 text-blue-600 hover:bg-blue-50"
+                        >
+                            Sort
+                        </Button>
+                        <Menu
+                            anchorEl={anchorEl}
+                            open={Boolean(anchorEl)}
+                            onClose={handleMenuClose}
+                        >
+                            <MenuItem onClick={() => handleSortChange('newest')}>Newest First</MenuItem>
+                            <MenuItem onClick={() => handleSortChange('oldest')}>Oldest First</MenuItem>
+                        </Menu>
+                    </div>
+                </div>
+
+                {paginatedGroups.map((group, index) => (
                     <div key={index} className="mb-16 bg-white rounded-3xl shadow-md overflow-hidden">
                         <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
                             <Typography variant="h4" className="font-bold">
@@ -220,41 +295,62 @@ const Leaderboard = () => {
                                 <Typography variant="body1" className="flex items-center gap-1">
                                     <span className="font-medium">Instructor:</span> {group.instructorName}
                                 </Typography>
+                                <Typography variant="body2" className="text-blue-100">
+                                    {group.eventDate.toLocaleDateString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric'
+                                    })}
+                                </Typography>
                             </div>
                         </div>
 
                         <div className="p-6">
-                            {/* Traditional podium layout - champion in center, silver on left, bronze on right */}
                             <div className="flex flex-col">
                                 <div className="flex justify-center mb-4">
                                     <div className="w-16 h-2 bg-blue-600 rounded-full"></div>
                                 </div>
 
                                 <Grid container spacing={4}>
-                                    {/* Silver medalist - Left */}
-
-                                    {/* Champion - Center */}
                                     <Grid item xs={12} md={4} className="-mt-6">
                                         {renderWinnerCard(group.firstPlace, 1)}
                                     </Grid>
-
                                     <Grid item xs={12} md={4}>
                                         {renderWinnerCard(group.secondPlace, 2)}
                                     </Grid>
-
-
-
-                                    {/* Bronze medalist - Right */}
                                     <Grid item xs={12} md={4}>
                                         {renderWinnerCard(group.thirdPlace, 3)}
                                     </Grid>
                                 </Grid>
-
-
                             </div>
                         </div>
                     </div>
                 ))}
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <div className="flex justify-center mt-8 mb-12">
+                        <Pagination
+                            count={totalPages}
+                            page={page}
+                            onChange={(event, value) => setPage(value)}
+                            color="primary"
+                            size="large"
+                            showFirstButton
+                            showLastButton
+                            sx={{
+                                '& .MuiPaginationItem-root': {
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                },
+                                '& .Mui-selected': {
+                                    backgroundColor: '#3B82F6 !important',
+                                    color: '#fff',
+                                },
+                            }}
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );

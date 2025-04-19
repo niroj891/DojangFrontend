@@ -385,7 +385,7 @@ const Community = () => {
                         <CardContent className="p-0">
                             <div className="p-4">
                                 <div className="flex items-center space-x-3">
-                                    <Avatar src={post.user?.image || "https://randomuser.me/api/portraits/men/1.jpg"} />
+                                    <Avatar src={"http://localhost:9696/images/user/" + post.user?.image || "https://randomuser.me/api/portraits/men/1.jpg"} />
                                     <div>
                                         <p className="font-semibold">
                                             {post.user?.firstName || "Unknown"} {post.user?.lastName || "User"}
