@@ -13,7 +13,9 @@ import {
     List,
     ListItem,
     ListItemAvatar,
-    ListItemText
+    ListItemText,
+    InputAdornment,
+    CircularProgress
 } from "@mui/material";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
@@ -25,6 +27,7 @@ import ChatIcon from '@mui/icons-material/Chat';
 import SendIcon from '@mui/icons-material/Send';
 import CloseIcon from '@mui/icons-material/Close';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import SearchIcon from '@mui/icons-material/Search';
 import axios from 'axios';
 
 const Community = () => {
@@ -35,19 +38,36 @@ const Community = () => {
     const [videoFile, setVideoFile] = useState(null);
     const [location, setLocation] = useState("");
     const [posts, setPosts] = useState([]);
+    const [filteredPosts, setFilteredPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [openComments, setOpenComments] = useState(false);
     const [currentPostId, setCurrentPostId] = useState(null);
     const [commentText, setCommentText] = useState("");
     const [currentPostComments, setCurrentPostComments] = useState([]);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchLoading, setSearchLoading] = useState(false);
 
     useEffect(() => {
         fetchPosts();
     }, []);
 
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (searchQuery.trim() === "") {
+                // If search query is empty, show all posts
+                setFilteredPosts(posts);
+            } else {
+                handleSearch();
+            }
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, posts]);
+
     const fetchPosts = async () => {
         try {
+            setLoading(true);
             const token = localStorage.getItem('jwt');
             const response = await axios.get('http://localhost:9696/api/posts', {
                 headers: {
@@ -55,10 +75,44 @@ const Community = () => {
                 }
             });
             setPosts(response.data);
+            setFilteredPosts(response.data); // Initialize filteredPosts with all posts
             setLoading(false);
         } catch (err) {
             setError(err.message);
             setLoading(false);
+        }
+    };
+
+    const handleSearch = async () => {
+        if (!searchQuery.trim()) {
+            setFilteredPosts(posts);
+            return;
+        }
+
+        try {
+            setSearchLoading(true);
+            const token = localStorage.getItem('jwt');
+            const response = await axios.get(`http://localhost:9696/api/posts/search?name=${searchQuery}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            setFilteredPosts(response.data);
+        } catch (err) {
+            console.error("Error searching posts:", err);
+            // Fallback to client-side filtering if API fails
+            const filtered = posts.filter(post => {
+                const searchLower = searchQuery.toLowerCase();
+                const captionMatch = post.caption?.toLowerCase().includes(searchLower);
+                const userMatch = `${post.user?.firstName || ''} ${post.user?.lastName || ''}`
+                    .toLowerCase().includes(searchLower);
+                const locationMatch = post.location?.toLowerCase().includes(searchLower);
+
+                return captionMatch || userMatch || locationMatch;
+            });
+            setFilteredPosts(filtered);
+        } finally {
+            setSearchLoading(false);
         }
     };
 
@@ -96,7 +150,7 @@ const Community = () => {
                 formData.append('location', location);
             }
 
-            const response = await axios.post('http://localhost:9696/api/posts', formData, {
+            await axios.post('http://localhost:9696/api/posts', formData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data'
@@ -104,7 +158,7 @@ const Community = () => {
             });
 
             // Refresh posts after successful creation
-            fetchPosts();
+            await fetchPosts();
 
             // Reset form
             setPostText("");
@@ -180,7 +234,7 @@ const Community = () => {
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
-                <div className="animate-pulse text-blue-600 font-semibold text-xl">Loading...</div>
+                <CircularProgress />
             </div>
         );
     }
@@ -198,43 +252,42 @@ const Community = () => {
 
     return (
         <div className="flex bg-gray-50 min-h-screen">
-            {/* Left Sidebar */}
-            <div className="w-1/4 p-5 hidden lg:block">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sticky top-5">
-                    <div className="flex flex-col items-center">
-                        <Avatar
-                            src="https://randomuser.me/api/portraits/men/1.jpg"
-                            sx={{ width: 70, height: 70 }}
-                        />
-                        <p className="mt-3 font-bold text-lg">John Doe</p>
-                        <p className="text-gray-500 text-sm">@johndoe</p>
-                    </div>
-
-                    <Divider className="my-4" />
-
-                    <div className="space-y-2">
-                        <Button
-                            startIcon={<PeopleIcon />}
-                            fullWidth
-                            variant="text"
-                            className="justify-start normal-case text-gray-700 hover:bg-blue-50 hover:text-blue-600 py-2"
-                        >
-                            Friends
-                        </Button>
-                        <Button
-                            startIcon={<ChatIcon />}
-                            fullWidth
-                            variant="text"
-                            className="justify-start normal-case text-gray-700 hover:bg-blue-50 hover:text-blue-600 py-2"
-                        >
-                            Messages
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
             {/* Middle Feed Section */}
             <div className="w-full lg:w-3/4 p-5 max-w-3xl mx-auto">
+                {/* Search Box */}
+                <Card className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
+                    <CardContent className="p-4">
+                        <TextField
+                            fullWidth
+                            placeholder="Search posts by user name..."
+                            variant="outlined"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                                endAdornment: searchLoading ? (
+                                    <InputAdornment position="end">
+                                        <CircularProgress size={20} />
+                                    </InputAdornment>
+                                ) : null
+                            }}
+                            sx={{
+                                '& .MuiOutlinedInput-root': {
+                                    borderRadius: '12px',
+                                    backgroundColor: '#f5f7fa',
+                                    '&:hover fieldset': {
+                                        borderColor: '#e0e7ff',
+                                    },
+                                }
+                            }}
+                        />
+                    </CardContent>
+                </Card>
+
                 {/* Create Post Card */}
                 <Card className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
                     <CardContent className="p-0">
@@ -356,8 +409,6 @@ const Community = () => {
                                         Video
                                     </Button>
                                 </label>
-
-
                             </div>
 
                             <Button
@@ -380,87 +431,99 @@ const Community = () => {
                 </Card>
 
                 {/* Posts List */}
-                {posts.map((post) => (
-                    <Card key={post.id} className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
-                        <CardContent className="p-0">
-                            <div className="p-4">
-                                <div className="flex items-center space-x-3">
-                                    <Avatar src={"http://localhost:9696/images/user/" + post.user?.image || "https://randomuser.me/api/portraits/men/1.jpg"} />
-                                    <div>
-                                        <p className="font-semibold">
-                                            {post.user?.firstName || "Unknown"} {post.user?.lastName || "User"}
-                                        </p>
-                                        <div className="flex items-center text-gray-500 text-xs">
-                                            <p>{formatDate(post.createdAt)}</p>
-                                            {post.location && (
-                                                <>
-                                                    <span className="mx-1">•</span>
-                                                    <LocationOnIcon fontSize="small" className="text-gray-500 mr-1" style={{ fontSize: '14px' }} />
-                                                    <span>{post.location}</span>
-                                                </>
-                                            )}
+                {filteredPosts.length > 0 ? (
+                    filteredPosts.map((post) => (
+                        <Card key={post.id} className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
+                            <CardContent className="p-0">
+                                <div className="p-4">
+                                    <div className="flex items-center space-x-3">
+                                        <Avatar src={"http://localhost:9696/images/user/" + post.user?.image || "https://randomuser.me/api/portraits/men/1.jpg"} />
+                                        <div>
+                                            <p className="font-semibold">
+                                                {post.user?.firstName || "Unknown"} {post.user?.lastName || "User"}
+                                            </p>
+                                            <div className="flex items-center text-gray-500 text-xs">
+                                                <p>{formatDate(post.createdAt)}</p>
+                                                {post.location && (
+                                                    <>
+                                                        <span className="mx-1">•</span>
+                                                        <LocationOnIcon fontSize="small" className="text-gray-500 mr-1" style={{ fontSize: '14px' }} />
+                                                        <span>{post.location}</span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
+
+                                    {post.caption && (
+                                        <p className="mt-3 text-gray-800">{post.caption}</p>
+                                    )}
+
+                                    {post.image && (
+                                        <div className="mt-3">
+                                            <img
+                                                src={`http://localhost:9696/images/post/${post.image}`}
+                                                alt="Post"
+                                                className="rounded-lg w-full object-cover"
+                                                style={{ maxHeight: '500px' }}
+                                            />
+                                        </div>
+                                    )}
+
+                                    {post.video && (
+                                        <div className="mt-3">
+                                            <video
+                                                src={`http://localhost:9696/videos/post/${post.video}`}
+                                                controls
+                                                className="rounded-lg w-full object-cover"
+                                                style={{ maxHeight: '500px' }}
+                                            />
+                                        </div>
+                                    )}
                                 </div>
 
-                                {post.caption && (
-                                    <p className="mt-3 text-gray-800">{post.caption}</p>
-                                )}
+                                <div className="px-4 py-1 flex items-center text-sm text-gray-500">
+                                    <span>{post.liked?.length || 0} likes</span>
+                                    <span className="mx-2">•</span>
+                                    <span>{post.comments?.length || 0} comments</span>
+                                </div>
 
-                                {post.image && (
-                                    <div className="mt-3">
-                                        <img
-                                            src={`http://localhost:9696/images/post/${post.image}`}
-                                            alt="Post"
-                                            className="rounded-lg w-full object-cover"
-                                            style={{ maxHeight: '500px' }}
-                                        />
-                                    </div>
-                                )}
+                                <Divider />
 
-                                {post.video && (
-                                    <div className="mt-3">
-                                        <video
-                                            src={`http://localhost:9696/videos/post/${post.video}`}
-                                            controls
-                                            className="rounded-lg w-full object-cover"
-                                            style={{ maxHeight: '500px' }}
-                                        />
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="px-4 py-1 flex items-center text-sm text-gray-500">
-                                <span>{post.liked?.length || 0} likes</span>
-                                <span className="mx-2">•</span>
-                                <span>{post.comments?.length || 0} comments</span>
-                            </div>
-
-                            <Divider />
-
-                            <div className="flex justify-around text-gray-600">
-                                <Button
-                                    startIcon={<ThumbUpIcon />}
-                                    onClick={() => handleLike(post.id)}
-                                    color={post.likedByRequser ? "primary" : "inherit"}
-                                    className="flex-1 rounded-none py-2"
-                                    sx={{ textTransform: 'none' }}
-                                >
-                                    Like
-                                </Button>
-                                <Divider orientation="vertical" flexItem />
-                                <Button
-                                    startIcon={<ChatBubbleOutlineIcon />}
-                                    onClick={() => handleOpenComments(post.id, post.comments)}
-                                    className="flex-1 rounded-none py-2"
-                                    sx={{ textTransform: 'none' }}
-                                >
-                                    Comment
-                                </Button>
-                            </div>
+                                <div className="flex justify-around text-gray-600">
+                                    <Button
+                                        startIcon={<ThumbUpIcon />}
+                                        onClick={() => handleLike(post.id)}
+                                        color={post.likedByRequser ? "primary" : "inherit"}
+                                        className="flex-1 rounded-none py-2"
+                                        sx={{ textTransform: 'none' }}
+                                    >
+                                        Like
+                                    </Button>
+                                    <Divider orientation="vertical" flexItem />
+                                    <Button
+                                        startIcon={<ChatBubbleOutlineIcon />}
+                                        onClick={() => handleOpenComments(post.id, post.comments)}
+                                        className="flex-1 rounded-none py-2"
+                                        sx={{ textTransform: 'none' }}
+                                    >
+                                        Comment
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                ) : (
+                    <Card className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
+                        <CardContent className="p-4 text-center">
+                            <Typography variant="body1" color="text.secondary">
+                                {searchQuery.trim() ?
+                                    "No posts match your search criteria." :
+                                    "No posts available. Be the first to post!"}
+                            </Typography>
                         </CardContent>
                     </Card>
-                ))}
+                )}
             </div>
 
             {/* Comments Modal */}
@@ -505,7 +568,7 @@ const Community = () => {
                                         <ListItemText
                                             primary={
                                                 <Typography component="span" variant="body2" color="text.primary" fontWeight="medium">
-                                                    {comment.fullName || "NO NAME"}
+                                                    {comment.user?.firstName || "Unknown"} {comment.user?.lastName || "User"}
                                                 </Typography>
                                             }
                                             secondary={
