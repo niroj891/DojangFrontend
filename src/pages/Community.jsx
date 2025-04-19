@@ -153,7 +153,7 @@ const Community = () => {
         try {
             const token = localStorage.getItem('jwt');
             const response = await axios.post(
-                `http://localhost:9696/api/posts/${currentPostId}/comment`,
+                `http://localhost:9696/api/comments/${currentPostId}`,
                 { content: commentText },
                 {
                     headers: {
@@ -512,7 +512,7 @@ const Community = () => {
                                         <ListItemText
                                             primary={
                                                 <Typography component="span" variant="body2" color="text.primary" fontWeight="medium">
-                                                    Anonymous User
+                                                    {comment.fullName || "NO NAME"}
                                                 </Typography>
                                             }
                                             secondary={
