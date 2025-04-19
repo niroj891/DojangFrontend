@@ -121,7 +121,7 @@ const Community = () => {
     const handleLike = async (postId) => {
         try {
             const token = localStorage.getItem('jwt');
-            await axios.post(`http://localhost:9696/api/posts/${postId}/like`, {}, {
+            await axios.put(`http://localhost:9696/api/posts/like/${postId}`, {}, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -357,14 +357,7 @@ const Community = () => {
                                     </Button>
                                 </label>
 
-                                <Button
-                                    startIcon={<LocationOnIcon />}
-                                    variant="text"
-                                    className="text-gray-600 normal-case"
-                                    onClick={() => setLocation("New Location")}
-                                >
-                                    Location
-                                </Button>
+
                             </div>
 
                             <Button
