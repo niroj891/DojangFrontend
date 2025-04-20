@@ -55,7 +55,6 @@ const Community = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             if (searchQuery.trim() === "") {
-                // If search query is empty, show all posts
                 setFilteredPosts(posts);
             } else {
                 handleSearch();
@@ -75,7 +74,7 @@ const Community = () => {
                 }
             });
             setPosts(response.data);
-            setFilteredPosts(response.data); // Initialize filteredPosts with all posts
+            setFilteredPosts(response.data);
             setLoading(false);
         } catch (err) {
             setError(err.message);
@@ -100,7 +99,6 @@ const Community = () => {
             setFilteredPosts(response.data);
         } catch (err) {
             console.error("Error searching posts:", err);
-            // Fallback to client-side filtering if API fails
             const filtered = posts.filter(post => {
                 const searchLower = searchQuery.toLowerCase();
                 const captionMatch = post.caption?.toLowerCase().includes(searchLower);
@@ -157,10 +155,8 @@ const Community = () => {
                 }
             });
 
-            // Refresh posts after successful creation
             await fetchPosts();
 
-            // Reset form
             setPostText("");
             setSelectedImage(null);
             setSelectedVideo(null);
@@ -181,7 +177,6 @@ const Community = () => {
                 }
             });
 
-            // Refresh posts after successful like
             fetchPosts();
         } catch (err) {
             console.error("Error liking post:", err);
@@ -219,7 +214,6 @@ const Community = () => {
             setCurrentPostComments([...currentPostComments, response.data]);
             setCommentText("");
 
-            // Refresh posts to update comment count
             fetchPosts();
         } catch (err) {
             console.error("Error adding comment:", err);
@@ -233,30 +227,69 @@ const Community = () => {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <CircularProgress />
-            </div>
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="100vh"
+                sx={{ bgcolor: '#F5F7FA' }}
+            >
+                <CircularProgress sx={{ color: '#6366F1' }} />
+            </Box>
         );
     }
 
     if (error) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <div className="bg-red-50 p-4 rounded-lg shadow-md border border-red-200">
-                    <h3 className="text-red-500 font-medium">Error</h3>
-                    <p>{error}</p>
-                </div>
-            </div>
+            <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                minHeight="100vh"
+                sx={{ bgcolor: '#F5F7FA' }}
+            >
+                <Box
+                    sx={{
+                        bgcolor: 'rgba(239, 68, 68, 0.1)',
+                        p: 4,
+                        borderRadius: 2,
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(239, 68, 68, 0.2)'
+                    }}
+                >
+                    <Typography variant="h6" sx={{ color: '#DC2626', fontWeight: 600 }}>
+                        Error
+                    </Typography>
+                    <Typography sx={{ color: '#B91C1C', mt: 1 }}>{error}</Typography>
+                </Box>
+            </Box>
         );
     }
 
     return (
-        <div className="flex bg-gray-50 min-h-screen">
-            {/* Middle Feed Section */}
-            <div className="w-full lg:w-3/4 p-5 max-w-3xl mx-auto">
+        <Box
+            display="flex"
+            minHeight="100vh"
+            sx={{
+                bgcolor: '#F5F7FA',
+                fontFamily: "'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif"
+            }}
+        >
+            {/* Main Content */}
+            <Box sx={{ maxWidth: '800px', mx: 'auto', width: '100%', p: 3 }}>
                 {/* Search Box */}
-                <Card className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
-                    <CardContent className="p-4">
+                <Card
+                    sx={{
+                        mb: 4,
+                        borderRadius: 4,
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)',
+                        bgcolor: 'white'
+                    }}
+                >
+                    <CardContent sx={{ p: 3 }}>
                         <TextField
                             fullWidth
                             placeholder="Search posts by user name..."
@@ -266,22 +299,26 @@ const Community = () => {
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <SearchIcon />
+                                        <SearchIcon sx={{ color: '#64748B' }} />
                                     </InputAdornment>
                                 ),
                                 endAdornment: searchLoading ? (
                                     <InputAdornment position="end">
-                                        <CircularProgress size={20} />
+                                        <CircularProgress size={20} sx={{ color: '#6366F1' }} />
                                     </InputAdornment>
-                                ) : null
-                            }}
-                            sx={{
-                                '& .MuiOutlinedInput-root': {
+                                ) : null,
+                                sx: {
                                     borderRadius: '12px',
-                                    backgroundColor: '#f5f7fa',
+                                    backgroundColor: '#F5F7FA',
                                     '&:hover fieldset': {
-                                        borderColor: '#e0e7ff',
+                                        borderColor: '#E0E7FF',
                                     },
+                                    '& fieldset': {
+                                        borderColor: 'transparent'
+                                    },
+                                    '&.Mui-focused fieldset': {
+                                        borderColor: '#6366F1',
+                                    }
                                 }
                             }}
                         />
@@ -289,11 +326,30 @@ const Community = () => {
                 </Card>
 
                 {/* Create Post Card */}
-                <Card className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
-                    <CardContent className="p-0">
-                        <div className="p-4">
-                            <div className="flex items-center space-x-3 mb-4">
-                                <Avatar src="https://randomuser.me/api/portraits/men/1.jpg" />
+                <Card
+                    sx={{
+                        mb: 4,
+                        borderRadius: 4,
+                        overflow: 'hidden',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        backdropFilter: 'blur(10px)',
+                        bgcolor: 'white'
+                    }}
+                >
+                    <CardContent sx={{ p: 0 }}>
+                        <Box p={3}>
+                            <Box display="flex" alignItems="center" gap={2} mb={2}>
+                                <Avatar
+                                    src="https://randomuser.me/api/portraits/men/1.jpg"
+                                    sx={{
+                                        width: 50,
+                                        height: 50,
+                                        bgcolor: 'primary.main',
+                                        fontSize: '1.5rem',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                                    }}
+                                />
                                 <TextField
                                     fullWidth
                                     placeholder="What's on your mind?"
@@ -304,76 +360,124 @@ const Community = () => {
                                     rows={2}
                                     sx={{
                                         '& .MuiOutlinedInput-root': {
-                                            borderRadius: '12px',
-                                            backgroundColor: '#f5f7fa',
+                                            borderRadius: '16px',
+                                            backgroundColor: '#F5F7FA',
                                             '&:hover fieldset': {
-                                                borderColor: '#e0e7ff',
+                                                borderColor: '#E0E7FF',
                                             },
+                                            '& fieldset': {
+                                                borderColor: 'transparent'
+                                            },
+                                            '&.Mui-focused fieldset': {
+                                                borderColor: '#6366F1',
+                                            }
                                         }
                                     }}
                                 />
-                            </div>
+                            </Box>
 
                             {selectedImage && (
-                                <div className="mt-3 relative">
+                                <Box mt={2} position="relative">
                                     <img
                                         src={selectedImage}
                                         alt="Selected"
-                                        className="w-full h-64 object-cover rounded-lg"
+                                        style={{
+                                            width: '100%',
+                                            height: '300px',
+                                            objectFit: 'cover',
+                                            borderRadius: '12px'
+                                        }}
                                     />
                                     <IconButton
                                         size="small"
-                                        className="absolute top-2 right-2 bg-black bg-opacity-50 text-white hover:bg-black hover:bg-opacity-70"
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 8,
+                                            right: 8,
+                                            bgcolor: 'rgba(0,0,0,0.6)',
+                                            color: 'white',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0,0,0,0.8)'
+                                            }
+                                        }}
                                         onClick={() => {
                                             setSelectedImage(null);
                                             setImageFile(null);
                                         }}
                                     >
-                                        <DeleteOutlineIcon />
+                                        <DeleteOutlineIcon fontSize="small" />
                                     </IconButton>
-                                </div>
+                                </Box>
                             )}
 
                             {selectedVideo && (
-                                <div className="mt-3 relative">
+                                <Box mt={2} position="relative">
                                     <video
                                         src={selectedVideo}
                                         controls
-                                        className="w-full h-64 object-cover rounded-lg"
+                                        style={{
+                                            width: '100%',
+                                            height: '300px',
+                                            objectFit: 'cover',
+                                            borderRadius: '12px'
+                                        }}
                                     />
                                     <IconButton
                                         size="small"
-                                        className="absolute top-2 right-2 bg-black bg-opacity-50 text-white hover:bg-black hover:bg-opacity-70"
+                                        sx={{
+                                            position: 'absolute',
+                                            top: 8,
+                                            right: 8,
+                                            bgcolor: 'rgba(0,0,0,0.6)',
+                                            color: 'white',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(0,0,0,0.8)'
+                                            }
+                                        }}
                                         onClick={() => {
                                             setSelectedVideo(null);
                                             setVideoFile(null);
                                         }}
                                     >
-                                        <DeleteOutlineIcon />
+                                        <DeleteOutlineIcon fontSize="small" />
                                     </IconButton>
-                                </div>
+                                </Box>
                             )}
 
                             {location && (
-                                <div className="flex items-center mt-2 bg-blue-50 p-2 rounded-lg">
-                                    <LocationOnIcon className="text-blue-500 mr-2" />
-                                    <p className="text-blue-700">{location}</p>
+                                <Box
+                                    mt={2}
+                                    display="flex"
+                                    alignItems="center"
+                                    p={1.5}
+                                    borderRadius={2}
+                                    sx={{ bgcolor: 'rgba(59, 130, 246, 0.1)' }}
+                                >
+                                    <LocationOnIcon sx={{ color: '#3B82F6', mr: 1 }} />
+                                    <Typography sx={{ color: '#1E40AF', fontWeight: 500 }}>
+                                        {location}
+                                    </Typography>
                                     <IconButton
                                         size="small"
-                                        color="default"
                                         onClick={() => setLocation("")}
-                                        className="ml-auto"
+                                        sx={{ ml: 'auto' }}
                                     >
                                         <CloseIcon fontSize="small" />
                                     </IconButton>
-                                </div>
+                                </Box>
                             )}
-                        </div>
+                        </Box>
 
-                        <Divider />
+                        <Divider sx={{ opacity: 0.6 }} />
 
-                        <div className="flex justify-between items-center px-4 py-2">
-                            <div className="flex space-x-1">
+                        <Box
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            px={3}
+                            py={2}
+                        >
+                            <Box display="flex" gap={1}>
                                 <input
                                     accept="image/*"
                                     id="image-input"
@@ -386,7 +490,15 @@ const Community = () => {
                                         startIcon={<ImageIcon />}
                                         component="span"
                                         variant="text"
-                                        className="text-gray-600 normal-case"
+                                        sx={{
+                                            color: '#64748B',
+                                            textTransform: 'none',
+                                            fontWeight: 500,
+                                            borderRadius: '12px',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(100, 116, 139, 0.08)'
+                                            }
+                                        }}
                                     >
                                         Photo
                                     </Button>
@@ -404,127 +516,283 @@ const Community = () => {
                                         startIcon={<VideocamIcon />}
                                         component="span"
                                         variant="text"
-                                        className="text-gray-600 normal-case"
+                                        sx={{
+                                            color: '#64748B',
+                                            textTransform: 'none',
+                                            fontWeight: 500,
+                                            borderRadius: '12px',
+                                            '&:hover': {
+                                                bgcolor: 'rgba(100, 116, 139, 0.08)'
+                                            }
+                                        }}
                                     >
                                         Video
                                     </Button>
                                 </label>
-                            </div>
+                            </Box>
 
                             <Button
                                 variant="contained"
                                 disabled={!postText && !selectedImage && !selectedVideo}
                                 onClick={handlePost}
                                 sx={{
-                                    borderRadius: '20px',
+                                    borderRadius: '12px',
                                     textTransform: 'none',
-                                    boxShadow: 'none',
+                                    fontWeight: 600,
+                                    bgcolor: '#6366F1',
+                                    boxShadow: '0 4px 14px rgba(99, 102, 241, 0.4)',
+                                    px: 3,
                                     '&:hover': {
-                                        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                                        bgcolor: '#4F46E5',
+                                        boxShadow: '0 6px 20px rgba(99, 102, 241, 0.6)',
+                                    },
+                                    '&.Mui-disabled': {
+                                        bgcolor: 'rgba(99, 102, 241, 0.3)',
+                                        color: 'white'
                                     }
                                 }}
                             >
                                 Post
                             </Button>
-                        </div>
+                        </Box>
                     </CardContent>
                 </Card>
 
                 {/* Posts List */}
                 {filteredPosts.length > 0 ? (
                     filteredPosts.map((post) => (
-                        <Card key={post.id} className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
-                            <CardContent className="p-0">
-                                <div className="p-4">
-                                    <div className="flex items-center space-x-3">
-                                        <Avatar src={"http://localhost:9696/images/user/" + post.user?.image || "https://randomuser.me/api/portraits/men/1.jpg"} />
-                                        <div>
-                                            <p className="font-semibold">
+                        <Card
+                            key={post.id}
+                            sx={{
+                                mb: 4,
+                                borderRadius: 4,
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                                overflow: 'hidden',
+                                transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                                '&:hover': {
+                                    transform: 'translateY(-4px)',
+                                    boxShadow: '0 10px 30px rgba(0,0,0,0.08)'
+                                }
+                            }}
+                        >
+                            <CardContent sx={{ p: 0 }}>
+                                <Box p={3}>
+                                    <Box display="flex" alignItems="center" gap={2}>
+                                        <Avatar
+                                            src={post.user?.image ? `http://localhost:9696/images/user/${post.user.image}` : undefined}
+                                            sx={{
+                                                width: 50,
+                                                height: 50,
+                                                bgcolor: 'primary.main',
+                                                fontSize: '1.25rem',
+                                                boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                                            }}
+                                        >
+                                            {!post.user?.image && (
+                                                `${post.user?.firstName?.charAt(0) || ""}${post.user?.lastName?.charAt(0) || ""}`
+                                            )}
+                                        </Avatar>
+                                        <Box>
+                                            <Typography fontWeight={600} color="#1F2937">
                                                 {post.user?.firstName || "Unknown"} {post.user?.lastName || "User"}
-                                            </p>
-                                            <div className="flex items-center text-gray-500 text-xs">
-                                                <p>{formatDate(post.createdAt)}</p>
+                                            </Typography>
+                                            <Box display="flex" alignItems="center" color="#6B7280" fontSize={13}>
+                                                <Typography variant="caption">{formatDate(post.createdAt)}</Typography>
                                                 {post.location && (
                                                     <>
-                                                        <span className="mx-1">•</span>
-                                                        <LocationOnIcon fontSize="small" className="text-gray-500 mr-1" style={{ fontSize: '14px' }} />
-                                                        <span>{post.location}</span>
+                                                        <Box
+                                                            component="span"
+                                                            mx={1}
+                                                            sx={{
+                                                                width: '4px',
+                                                                height: '4px',
+                                                                borderRadius: '50%',
+                                                                bgcolor: '#CBD5E1',
+                                                                display: 'inline-block'
+                                                            }}
+                                                        />
+                                                        <LocationOnIcon
+                                                            fontSize="small"
+                                                            sx={{ color: '#6B7280', mr: 0.5, fontSize: 14 }}
+                                                        />
+                                                        <Typography variant="caption">{post.location}</Typography>
                                                     </>
                                                 )}
-                                            </div>
-                                        </div>
-                                    </div>
+                                            </Box>
+                                        </Box>
+                                    </Box>
 
                                     {post.caption && (
-                                        <p className="mt-3 text-gray-800">{post.caption}</p>
+                                        <Typography
+                                            sx={{
+                                                mt: 2.5,
+                                                color: '#1F2937',
+                                                lineHeight: 1.6
+                                            }}
+                                        >
+                                            {post.caption}
+                                        </Typography>
                                     )}
 
                                     {post.image && (
-                                        <div className="mt-3">
+                                        <Box mt={2.5}>
                                             <img
                                                 src={`http://localhost:9696/images/post/${post.image}`}
                                                 alt="Post"
-                                                className="rounded-lg w-full object-cover"
-                                                style={{ maxHeight: '500px' }}
+                                                style={{
+                                                    width: '100%',
+                                                    maxHeight: '500px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '16px'
+                                                }}
                                             />
-                                        </div>
+                                        </Box>
                                     )}
 
                                     {post.video && (
-                                        <div className="mt-3">
+                                        <Box mt={2.5}>
                                             <video
                                                 src={`http://localhost:9696/videos/post/${post.video}`}
                                                 controls
-                                                className="rounded-lg w-full object-cover"
-                                                style={{ maxHeight: '500px' }}
+                                                style={{
+                                                    width: '100%',
+                                                    maxHeight: '500px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '16px'
+                                                }}
                                             />
-                                        </div>
+                                        </Box>
                                     )}
-                                </div>
+                                </Box>
 
-                                <div className="px-4 py-1 flex items-center text-sm text-gray-500">
-                                    <span>{post.liked?.length || 0} likes</span>
-                                    <span className="mx-2">•</span>
-                                    <span>{post.comments?.length || 0} comments</span>
-                                </div>
+                                <Box
+                                    px={3}
+                                    py={1.5}
+                                    display="flex"
+                                    alignItems="center"
+                                    color="#6B7280"
+                                    fontSize={14}
+                                >
+                                    <Box
+                                        display="flex"
+                                        alignItems="center"
+                                        sx={{
+                                            bgcolor: 'rgba(99, 102, 241, 0.08)',
+                                            borderRadius: '16px',
+                                            px: 1.5,
+                                            py: 0.5
+                                        }}
+                                    >
+                                        <ThumbUpIcon sx={{ fontSize: 16, color: post.likedByRequser ? '#6366F1' : '#9CA3AF', mr: 0.5 }} />
+                                        <Typography variant="caption" sx={{ color: post.likedByRequser ? '#6366F1' : '#6B7280', fontWeight: 500 }}>
+                                            {post.liked?.length || 0}
+                                        </Typography>
+                                    </Box>
 
-                                <Divider />
+                                    <Box
+                                        display="flex"
+                                        alignItems="center"
+                                        sx={{
+                                            bgcolor: 'rgba(99, 102, 241, 0.08)',
+                                            borderRadius: '16px',
+                                            px: 1.5,
+                                            py: 0.5,
+                                            ml: 1.5
+                                        }}
+                                    >
+                                        <ChatBubbleOutlineIcon sx={{ fontSize: 16, color: '#9CA3AF', mr: 0.5 }} />
+                                        <Typography variant="caption" sx={{ color: '#6B7280', fontWeight: 500 }}>
+                                            {post.comments?.length || 0}
+                                        </Typography>
+                                    </Box>
+                                </Box>
 
-                                <div className="flex justify-around text-gray-600">
+                                <Divider sx={{ opacity: 0.6 }} />
+
+                                <Box
+                                    display="flex"
+                                    justifyContent="space-between"
+                                    sx={{ bgcolor: 'rgba(249, 250, 251, 0.8)' }}
+                                >
                                     <Button
                                         startIcon={<ThumbUpIcon />}
                                         onClick={() => handleLike(post.id)}
-                                        color={post.likedByRequser ? "primary" : "inherit"}
-                                        className="flex-1 rounded-none py-2"
-                                        sx={{ textTransform: 'none' }}
+                                        sx={{
+                                            flex: 1,
+                                            py: 1.5,
+                                            color: post.likedByRequser ? '#6366F1' : '#64748B',
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            borderRadius: 0,
+                                            '&:hover': {
+                                                bgcolor: 'rgba(99, 102, 241, 0.08)'
+                                            }
+                                        }}
                                     >
                                         Like
                                     </Button>
-                                    <Divider orientation="vertical" flexItem />
+                                    <Divider orientation="vertical" flexItem sx={{ opacity: 0.6 }} />
                                     <Button
                                         startIcon={<ChatBubbleOutlineIcon />}
                                         onClick={() => handleOpenComments(post.id, post.comments)}
-                                        className="flex-1 rounded-none py-2"
-                                        sx={{ textTransform: 'none' }}
+                                        sx={{
+                                            flex: 1,
+                                            py: 1.5,
+                                            color: '#64748B',
+                                            textTransform: 'none',
+                                            fontWeight: 600,
+                                            borderRadius: 0,
+                                            '&:hover': {
+                                                bgcolor: 'rgba(99, 102, 241, 0.08)'
+                                            }
+                                        }}
                                     >
                                         Comment
                                     </Button>
-                                </div>
+                                </Box>
                             </CardContent>
                         </Card>
                     ))
                 ) : (
-                    <Card className="mb-6 shadow-sm border border-gray-100 rounded-xl overflow-hidden">
-                        <CardContent className="p-4 text-center">
-                            <Typography variant="body1" color="text.secondary">
-                                {searchQuery.trim() ?
-                                    "No posts match your search criteria." :
-                                    "No posts available. Be the first to post!"}
-                            </Typography>
-                        </CardContent>
-                    </Card>
+                    <Box
+                        display="flex"
+                        flexDirection="column"
+                        alignItems="center"
+                        justifyContent="center"
+                        mt={8}
+                        mb={8}
+                        p={6}
+                        borderRadius={4}
+                        sx={{
+                            bgcolor: 'white',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                            maxWidth: '800px',
+                            mx: 'auto'
+                        }}
+                    >
+                        <Box
+                            sx={{
+                                bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                borderRadius: '50%',
+                                width: 100,
+                                height: 100,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                mb: 3
+                            }}
+                        >
+                            <ChatBubbleOutlineIcon sx={{ fontSize: 50, color: '#6366F1' }} />
+                        </Box>
+                        <Typography variant="h5" fontWeight={600} color="#1F2937" mb={1}>
+                            {searchQuery.trim() ? "No matching posts found" : "No posts yet"}
+                        </Typography>
+                        <Typography variant="body1" color="#64748B" textAlign="center">
+                            {searchQuery.trim() ? "Try a different search term" : "Share your thoughts to create your first post!"}
+                        </Typography>
+                    </Box>
                 )}
-            </div>
+            </Box>
 
             {/* Comments Modal */}
             <Modal
@@ -538,41 +806,96 @@ const Community = () => {
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: { xs: '90%', sm: 450 },
+                    width: { xs: '90%', sm: 480 },
                     bgcolor: 'background.paper',
-                    boxShadow: 24,
-                    borderRadius: '16px',
+                    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    borderRadius: '24px',
                     p: 0,
                     maxHeight: '80vh',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column'
                 }}>
-                    <div className="flex justify-between items-center p-4 border-b">
-                        <Typography id="comments-modal-title" variant="h6" component="h2" className="font-semibold">
+                    <Box
+                        display="flex"
+                        justifyContent="space-between"
+                        alignItems="center"
+                        p={3}
+                        borderBottom="1px solid rgba(0,0,0,0.06)"
+                    >
+                        <Typography
+                            id="comments-modal-title"
+                            variant="h6"
+                            fontWeight={600}
+                            sx={{
+                                background: 'linear-gradient(90deg, #6366F1, #8B5CF6)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent'
+                            }}
+                        >
                             Comments
                         </Typography>
-                        <IconButton onClick={handleCloseComments} size="small" className="hover:bg-gray-100">
-                            <CloseIcon />
+                        <IconButton
+                            onClick={handleCloseComments}
+                            size="small"
+                            sx={{
+                                bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                '&:hover': {
+                                    bgcolor: 'rgba(99, 102, 241, 0.2)'
+                                }
+                            }}
+                        >
+                            <CloseIcon sx={{ fontSize: 18, color: '#6366F1' }} />
                         </IconButton>
-                    </div>
+                    </Box>
 
-                    <div className="overflow-y-auto p-4 flex-1">
+                    <Box sx={{ overflowY: 'auto', p: 3, flex: 1 }}>
                         <List sx={{ width: '100%', bgcolor: 'background.paper', padding: 0 }}>
                             {currentPostComments.length > 0 ? (
                                 currentPostComments.map((comment, index) => (
-                                    <ListItem key={index} alignItems="flex-start" sx={{ px: 0 }}>
+                                    <ListItem
+                                        key={index}
+                                        alignItems="flex-start"
+                                        sx={{
+                                            px: 0,
+                                            pb: 2,
+                                            mb: 2,
+                                            borderBottom: index !== currentPostComments.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none'
+                                        }}
+                                    >
                                         <ListItemAvatar>
-                                            <Avatar alt="User" src="https://randomuser.me/api/portraits/men/1.jpg" />
+                                            <Avatar
+                                                alt="User"
+                                                src="https://randomuser.me/api/portraits/men/1.jpg"
+                                                sx={{
+                                                    width: 42,
+                                                    height: 42,
+                                                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
+                                                }}
+                                            />
                                         </ListItemAvatar>
                                         <ListItemText
                                             primary={
-                                                <Typography component="span" variant="body2" color="text.primary" fontWeight="medium">
-                                                    {comment.user?.firstName || "Unknown"} {comment.user?.lastName || "User"}
+                                                <Typography
+                                                    component="span"
+                                                    variant="subtitle2"
+                                                    fontWeight={600}
+                                                    color="#1F2937"
+                                                >
+                                                    {comment.fullName || "Anonymous"}
                                                 </Typography>
                                             }
                                             secondary={
-                                                <Typography component="span" variant="body1" color="text.primary" sx={{ display: 'block', mt: 0.5 }}>
+                                                <Typography
+                                                    component="span"
+                                                    variant="body2"
+                                                    color="#4B5563"
+                                                    sx={{
+                                                        display: 'block',
+                                                        mt: 0.5,
+                                                        lineHeight: 1.6
+                                                    }}
+                                                >
                                                     {comment.content}
                                                 </Typography>
                                             }
@@ -580,24 +903,52 @@ const Community = () => {
                                     </ListItem>
                                 ))
                             ) : (
-                                <div className="flex flex-col items-center justify-center py-8 text-gray-500">
-                                    <ChatBubbleOutlineIcon sx={{ fontSize: 50, mb: 2, color: '#e0e0e0' }} />
-                                    <Typography variant="body1" color="text.secondary">
+                                <Box
+                                    display="flex"
+                                    flexDirection="column"
+                                    alignItems="center"
+                                    justifyContent="center"
+                                    py={8}
+                                >
+                                    <Box
+                                        sx={{
+                                            bgcolor: 'rgba(99, 102, 241, 0.1)',
+                                            borderRadius: '50%',
+                                            width: 80,
+                                            height: 80,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            mb: 3
+                                        }}
+                                    >
+                                        <ChatBubbleOutlineIcon sx={{ fontSize: 40, color: '#6366F1' }} />
+                                    </Box>
+                                    <Typography variant="h6" fontWeight={600} color="#1F2937" mb={1}>
                                         No comments yet
                                     </Typography>
-                                    <Typography variant="body2" color="text.secondary" className="mt-1">
-                                        Be the first to comment!
+                                    <Typography variant="body2" color="#64748B" textAlign="center">
+                                        Be the first to share your thoughts!
                                     </Typography>
-                                </div>
+                                </Box>
                             )}
                         </List>
-                    </div>
+                    </Box>
 
-                    <div className="p-3 border-t bg-gray-50">
-                        <div className="flex items-center">
+                    <Box
+                        p={3}
+                        borderTop="1px solid rgba(0,0,0,0.06)"
+                        bgcolor="#F9FAFB"
+                    >
+                        <Box display="flex" alignItems="center" gap={2}>
                             <Avatar
                                 src="https://randomuser.me/api/portraits/men/1.jpg"
-                                sx={{ width: 32, height: 32, mr: 1 }}
+                                sx={{
+                                    width: 40,
+                                    height: 40,
+                                    bgcolor: 'primary.main',
+                                    fontSize: '1rem'
+                                }}
                             />
                             <TextField
                                 fullWidth
@@ -615,6 +966,15 @@ const Community = () => {
                                     '& .MuiOutlinedInput-root': {
                                         borderRadius: '20px',
                                         backgroundColor: 'white',
+                                        '& fieldset': {
+                                            borderColor: 'rgba(0,0,0,0.06)'
+                                        },
+                                        '&:hover fieldset': {
+                                            borderColor: '#E0E7FF'
+                                        },
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#6366F1'
+                                        }
                                     }
                                 }}
                             />
@@ -622,15 +982,22 @@ const Community = () => {
                                 color="primary"
                                 onClick={handleAddComment}
                                 disabled={!commentText.trim()}
-                                sx={{ ml: 1 }}
+                                sx={{
+                                    bgcolor: commentText.trim() ? '#6366F1' : 'rgba(99, 102, 241, 0.4)',
+                                    color: 'white',
+                                    '&:hover': {
+                                        bgcolor: commentText.trim() ? '#4F46E5' : 'rgba(99, 102, 241, 0.4)'
+                                    },
+                                    transition: 'all 0.2s ease'
+                                }}
                             >
-                                <SendIcon />
+                                <SendIcon fontSize="small" />
                             </IconButton>
-                        </div>
-                    </div>
+                        </Box>
+                    </Box>
                 </Box>
             </Modal>
-        </div>
+        </Box>
     );
 };
 

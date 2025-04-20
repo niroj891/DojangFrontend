@@ -8,21 +8,21 @@ const getRankStyle = (rank) => {
     switch (rank) {
         case 1:
             return {
-                icon: <FaTrophy className="text-4xl text-yellow-500" />,
+                icon: <FaTrophy className="text-2xl text-yellow-500" />,
                 bgColor: "bg-gradient-to-br from-yellow-50 to-yellow-100",
                 borderColor: "border-yellow-300",
                 badgeColor: "bg-yellow-500"
             };
         case 2:
             return {
-                icon: <FaMedal className="text-3xl text-gray-400" />,
+                icon: <FaMedal className="text-xl text-gray-400" />,
                 bgColor: "bg-gradient-to-br from-gray-50 to-gray-100",
                 borderColor: "border-gray-300",
                 badgeColor: "bg-gray-300"
             };
         case 3:
             return {
-                icon: <FaMedal className="text-3xl text-orange-700" />,
+                icon: <FaMedal className="text-xl text-orange-700" />,
                 bgColor: "bg-gradient-to-br from-orange-50 to-orange-100",
                 borderColor: "border-orange-300",
                 badgeColor: "bg-orange-600"
@@ -139,54 +139,59 @@ const Leaderboard = () => {
 
         const rankLabels = {
             1: "CHAMPION",
-            2: "SILVER MEDALIST",
-            3: "BRONZE MEDALIST"
+            2: "SILVER",
+            3: "BRONZE"
         };
 
         return (
             <Card
-                className={`w-full h-full shadow-lg rounded-2xl flex flex-col ${bgColor} overflow-hidden border ${borderColor} transition-all duration-300 hover:shadow-xl transform hover:-translate-y-1`}
+                className={`w-full shadow-md rounded-xl ${bgColor} overflow-hidden border ${borderColor} transition-all duration-300 hover:shadow-lg transform hover:-translate-y-1`}
+                sx={{ height: '200px' }}
             >
-                <div className={`w-full py-3 ${badgeColor} text-white text-center relative`}>
-                    <div className="absolute top-0 right-0 m-2">
+                <div className={`w-full py-2 ${badgeColor} text-white text-center relative`}>
+                    <div className="absolute top-1 right-2">
                         {icon}
                     </div>
-                    <Typography variant="h6" className="font-bold uppercase tracking-wider">
+                    <Typography variant="subtitle2" className="font-bold uppercase tracking-wider text-xs">
                         {rankLabels[rank]}
                     </Typography>
                 </div>
 
-                <div className="flex flex-col items-center p-4">
-                    <div className="relative mb-2">
+                <div className="flex items-center p-4 h-[calc(200px-40px)]">
+                    <div className="relative mr-4">
                         <img
                             src={getUserImage(winner)}
                             alt={`${firstName || "Winner"} ${lastName || ""}`}
-                            className={`w-28 h-28 object-cover rounded-full border-4 ${borderColor} shadow-md`}
+                            className={`w-16 h-16 object-cover rounded-full border-2 ${borderColor}`}
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = getRandomImage(id || 1);
                             }}
                         />
-                        <div className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-md">
-                            <div className="rounded-full bg-blue-600 text-white font-bold w-8 h-8 flex items-center justify-center text-sm">
+                        <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow">
+                            <div className="rounded-full bg-blue-600 text-white font-bold w-6 h-6 flex items-center justify-center text-xs">
                                 {winner.points}
                             </div>
                         </div>
                     </div>
 
-                    <Typography variant="h5" className="font-bold mt-2 text-gray-800">
-                        {firstName || "Winner"} {lastName || ""}
-                    </Typography>
-
-                    <div className="flex items-center mt-1 text-gray-500">
-                        <span className="text-xs bg-gray-100 px-2 py-1 rounded-full">ID: {id || "N/A"}</span>
-                    </div>
-
-                    <div className="flex items-center gap-1 mt-3 text-gray-700">
-                        <FaUniversity className="text-lg text-blue-600" />
-                        <Typography variant="body1" className="font-medium">
-                            {dojangName || "Unknown Dojang"}
+                    <div className="flex flex-col flex-1">
+                        <Typography variant="body1" className="font-bold text-gray-800 leading-tight text-lg">
+                            {firstName || "Winner"} {lastName || ""}
                         </Typography>
+
+                        <div className="flex items-center mt-2 text-sm text-gray-500">
+                            <FaUniversity className="text-blue-600 mr-1" />
+                            <Typography variant="caption" noWrap className="max-w-[160px]" title={dojangName || "Unknown Dojang"}>
+                                {dojangName || "Unknown Dojang"}
+                            </Typography>
+                        </div>
+
+                        <div className="mt-3">
+                            <span className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-600">
+                                ID: {id || "N/A"}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </Card>
@@ -197,8 +202,8 @@ const Leaderboard = () => {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
                 <div className="flex flex-col items-center">
-                    <CircularProgress sx={{ color: "#3B82F6" }} />
-                    <Typography variant="h6" className="mt-4 text-gray-600">
+                    <CircularProgress sx={{ color: "#3B82F6" }} size={32} />
+                    <Typography variant="subtitle1" className="mt-3 text-gray-600">
                         Loading Tournament Results...
                     </Typography>
                 </div>
@@ -209,11 +214,11 @@ const Leaderboard = () => {
     if (error) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="bg-blue-50 p-6 rounded-lg shadow-md border border-blue-200 max-w-md">
-                    <Typography variant="h5" color="primary" className="font-bold mb-2">
+                <div className="bg-blue-50 p-4 rounded-lg shadow-md border border-blue-200 max-w-md">
+                    <Typography variant="h6" color="primary" className="font-bold mb-2">
                         Error Loading Leaderboard
                     </Typography>
-                    <Typography variant="body1" className="text-gray-700">
+                    <Typography variant="body2" className="text-gray-700">
                         {error}
                     </Typography>
                 </div>
@@ -224,12 +229,12 @@ const Leaderboard = () => {
     if (winnerGroups.length === 0) {
         return (
             <div className="flex justify-center items-center h-screen bg-gray-50">
-                <div className="bg-blue-50 p-8 rounded-lg shadow-md border border-blue-100 max-w-md text-center">
-                    <GiBlackBelt className="text-6xl text-blue-700 mx-auto mb-4" />
-                    <Typography variant="h5" className="font-bold text-gray-800">
+                <div className="bg-blue-50 p-6 rounded-lg shadow-md border border-blue-100 max-w-md text-center">
+                    <GiBlackBelt className="text-5xl text-blue-700 mx-auto mb-3" />
+                    <Typography variant="h6" className="font-bold text-gray-800">
                         No Tournament Results Available
                     </Typography>
-                    <Typography variant="body1" className="mt-2 text-gray-600">
+                    <Typography variant="body2" className="mt-2 text-gray-600">
                         Check back later for upcoming competition results
                     </Typography>
                 </div>
@@ -238,31 +243,32 @@ const Leaderboard = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-6">
-            <div className="container mx-auto">
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                        <GiBlackBelt className="text-5xl text-blue-700" />
+        <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white p-4">
+            <div className="container mx-auto max-w-5xl">
+                <div className="text-center mb-6">
+                    <div className="flex justify-center mb-2">
+                        <GiBlackBelt className="text-4xl text-blue-700" />
                     </div>
-                    <Typography variant="h3" className="font-bold text-gray-800 tracking-tighter">
+                    <Typography variant="h4" className="font-bold text-gray-800 tracking-tighter">
                         Taekwondo <span className="text-blue-600">Champions</span>
                     </Typography>
-                    <Typography variant="h6" className="text-gray-500 mt-2">
+                    <Typography variant="subtitle1" className="text-gray-500">
                         Tournament Results & Rankings
                     </Typography>
                 </div>
 
                 {/* Sorting controls */}
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex justify-between items-center mb-4 px-2">
                     <div className="flex items-center space-x-2">
-                        <FaCalendarAlt className="text-blue-600" />
-                        <Typography variant="body1" className="text-gray-600">
+                        <FaCalendarAlt className="text-blue-600 text-sm" />
+                        <Typography variant="body2" className="text-gray-600">
                             {sortOrder === 'newest' ? 'Newest First' : 'Oldest First'}
                         </Typography>
                     </div>
                     <div>
                         <Button
                             variant="outlined"
+                            size="small"
                             startIcon={<FaSort />}
                             onClick={handleMenuOpen}
                             className="border-blue-600 text-blue-600 hover:bg-blue-50"
@@ -281,66 +287,63 @@ const Leaderboard = () => {
                 </div>
 
                 {paginatedGroups.map((group, index) => (
-                    <div key={index} className="mb-16 bg-white rounded-3xl shadow-md overflow-hidden">
-                        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-6">
-                            <Typography variant="h4" className="font-bold">
-                                {group.eventName}
-                            </Typography>
-                            <div className="flex flex-wrap items-center justify-between mt-2">
-                                <Typography variant="h6" className="flex items-center gap-2">
-                                    <span className="bg-white text-blue-600 px-3 py-1 rounded-full text-sm font-bold">
-                                        {group.weightCategory.replace("BELOW", "Below ")} kg
-                                    </span>
+                    <div key={index} className="mb-8 bg-white rounded-xl shadow-sm overflow-hidden">
+                        <div className="bg-gradient-to-r from-red-600 to-black text-white p-3">
+                            <div className="flex flex-wrap items-center justify-between">
+                                <Typography variant="h6" className="font-bold">
+                                    {group.eventName}
                                 </Typography>
-                                <Typography variant="body1" className="flex items-center gap-1">
-                                    <span className="font-medium">Instructor:</span> {group.instructorName}
-                                </Typography>
-                                <Typography variant="body2" className="text-blue-100">
+                                <Typography variant="caption" className="text-blue-100">
                                     {group.eventDate.toLocaleDateString('en-US', {
                                         year: 'numeric',
-                                        month: 'long',
+                                        month: 'short',
                                         day: 'numeric'
                                     })}
                                 </Typography>
                             </div>
+                            <div className="flex flex-wrap items-center justify-between mt-1">
+                                <Typography variant="body2" className="flex items-center gap-1">
+                                    <span className="bg-white text-blue-600 px-2 py-0.5 rounded-full text-xs font-bold">
+                                        {group.weightCategory.replace("BELOW", "Below ")} kg
+                                    </span>
+                                </Typography>
+                                <Typography variant="caption" className="text-blue-100">
+                                    Instructor: {group.instructorName}
+                                </Typography>
+                            </div>
                         </div>
 
-                        <div className="p-6">
-                            <div className="flex flex-col">
-                                <div className="flex justify-center mb-4">
-                                    <div className="w-16 h-2 bg-blue-600 rounded-full"></div>
-                                </div>
+                        <div className="p-3">
+                            <Grid container spacing={2}>
 
-                                <Grid container spacing={4}>
-                                    <Grid item xs={12} md={4} className="-mt-6">
-                                        {renderWinnerCard(group.firstPlace, 1)}
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
-                                        {renderWinnerCard(group.secondPlace, 2)}
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
-                                        {renderWinnerCard(group.thirdPlace, 3)}
-                                    </Grid>
+                                <Grid item xs={4} className="flex items-center justify-center -mt-4">
+                                    {renderWinnerCard(group.firstPlace, 1)}
                                 </Grid>
-                            </div>
+                                <Grid item xs={4} className="flex items-center justify-center">
+                                    {renderWinnerCard(group.secondPlace, 2)}
+                                </Grid>
+                                <Grid item xs={4} className="flex items-center justify-center">
+                                    {renderWinnerCard(group.thirdPlace, 3)}
+                                </Grid>
+                            </Grid>
                         </div>
                     </div>
                 ))}
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex justify-center mt-8 mb-12">
+                    <div className="flex justify-center mt-6 mb-8">
                         <Pagination
                             count={totalPages}
                             page={page}
                             onChange={(event, value) => setPage(value)}
                             color="primary"
-                            size="large"
+                            size="medium"
                             showFirstButton
                             showLastButton
                             sx={{
                                 '& .MuiPaginationItem-root': {
-                                    fontSize: '1rem',
+                                    fontSize: '0.875rem',
                                     fontWeight: '600',
                                 },
                                 '& .Mui-selected': {
