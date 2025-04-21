@@ -866,7 +866,7 @@ const Community = () => {
                                         <ListItemAvatar>
                                             <Avatar
                                                 alt="User"
-                                                src="https://randomuser.me/api/portraits/men/1.jpg"
+                                                src={`http://localhost:9696/images/user/${comment.imageUrl}`}
                                                 sx={{
                                                     width: 42,
                                                     height: 42,
@@ -942,7 +942,7 @@ const Community = () => {
                     >
                         <Box display="flex" alignItems="center" gap={2}>
                             <Avatar
-                                src="https://randomuser.me/api/portraits/men/1.jpg"
+
                                 sx={{
                                     width: 40,
                                     height: 40,

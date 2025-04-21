@@ -2,100 +2,8 @@ import { CircularProgress } from "@mui/material";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// const EventCard = ({ event, onRegisterClick }) => {
-//     const currentDate = new Date();
-//     const eventEndDate = event.endDate ? new Date(event.endDate) : new Date(event.eventDate);
-//     const registrationOpen = currentDate <= eventEndDate;
-
-//     const formatDate = (date) => {
-//         return new Date(date).toLocaleDateString('en-US', {
-//             year: 'numeric',
-//             month: 'short',
-//             day: 'numeric'
-//         });
-//     };
-
-//     const statusBadgeClass = registrationOpen
-//         ? "bg-green-100 text-green-800"
-//         : "bg-gray-100 text-gray-800";
-
-//     return (
-//         <div className="w-full sm:w-72 rounded-xl overflow-hidden bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-300">
-//             <div className="relative">
-//                 <img
-//                     src={event.imageUrl ? `http://localhost:9696/images/event/${event.imageUrl}` : "/image/default-event.jpg"}
-//                     alt={event.title || "Event image"}
-//                     className="h-52 w-full object-cover"
-//                 />
-
-//                 <div className={`absolute top-3 right-3 ${statusBadgeClass} px-3 py-1 rounded-full text-xs font-medium`}>
-//                     {registrationOpen ? "Registration Open" : "Registration Closed"}
-//                 </div>
-//             </div>
-
-//             <div className="p-5">
-//                 <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-//                     {event.title || "Upcoming Taekwondo Event"}
-//                 </h3>
-
-//                 <div className="flex items-center mb-3">
-//                     <div className="bg-red-50 text-red-700 text-xs px-2 py-1 rounded-full flex items-center">
-//                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-//                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1z" />
-//                         </svg>
-//                         <span>{event.instructor.firstName + ' ' + event.instructor.lastName || 'Unknown instrcutor'}</span>
-//                     </div>
-//                 </div>
-
-//                 <div className="space-y-2 mb-4">
-//                     <div className="flex items-center text-gray-600">
-//                         <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-//                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-//                         </svg>
-//                         <span className="ml-2 text-sm">
-//                             {event.location || "Kathmandu"}
-//                         </span>
-//                     </div>
-
-//                     <div className="flex items-center text-gray-600">
-//                         <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-//                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-//                         </svg>
-//                         <span className="ml-2 text-sm">
-//                             {formatDate(event.eventDate)}
-//                             {event.endDate && (
-//                                 <> to {formatDate(event.endDate)}</>
-//                             )}
-//                         </span>
-//                     </div>
-
-//                     <div className="flex items-center text-gray-600">
-//                         <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-//                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z" />
-//                         </svg>
-//                         <span className="ml-2 text-sm">
-//                             <strong>{event.registrations?.length || 0}</strong> participants registered
-//                         </span>
-//                     </div>
-//                 </div>
-
-//                 <button
-//                     className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${registrationOpen
-//                         ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white'
-//                         : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-//                         }`}
-//                     disabled={!registrationOpen}
-//                     onClick={() => registrationOpen && onRegisterClick(event.eventId)}
-//                     aria-label={registrationOpen ? `Register for ${event.title || "event"}` : "Registration closed"}
-//                 >
-//                     {registrationOpen ? "Register Now" : "Registration Closed"}
-//                 </button>
-//             </div>
-//         </div>
-//     );
-// };
-
 const EventCard = ({ event, onRegisterClick, onBuyTicketClick }) => {
+    console.log(event)
     const currentDate = new Date();
     const eventEndDate = event.endDate ? new Date(event.endDate) : new Date(event.eventDate);
     const registrationOpen = currentDate <= eventEndDate;
@@ -109,11 +17,11 @@ const EventCard = ({ event, onRegisterClick, onBuyTicketClick }) => {
     };
 
     const statusBadgeClass = registrationOpen
-        ? "bg-green-100 text-green-800"
-        : "bg-gray-100 text-gray-800";
+        ? "bg-emerald-100 text-emerald-800"
+        : "bg-amber-100 text-amber-800";
 
     return (
-        <div className="w-full sm:w-72 rounded-xl overflow-hidden bg-white border border-gray-200 shadow-md hover:shadow-lg transition-shadow duration-300">
+        <div className="w-full sm:w-72 rounded-xl overflow-hidden bg-white border border-gray-200 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
             <div className="relative">
                 <img
                     src={event.imageUrl ? `http://localhost:9696/images/event/${event.imageUrl}` : "/image/default-event.jpg"}
@@ -121,73 +29,77 @@ const EventCard = ({ event, onRegisterClick, onBuyTicketClick }) => {
                     className="h-52 w-full object-cover"
                 />
 
-                <div className={`absolute top-3 right-3 ${statusBadgeClass} px-3 py-1 rounded-full text-xs font-medium`}>
+                <div className={`absolute top-3 right-3 ${statusBadgeClass} px-3 py-1 rounded-full text-xs font-semibold shadow-sm`}>
                     {registrationOpen ? "Registration Open" : "Registration Closed"}
+                </div>
+
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                    <h3 className="text-xl font-bold text-white mb-1 line-clamp-2">
+                        {event.title || "Upcoming Taekwondo Event"}
+                    </h3>
                 </div>
             </div>
 
             <div className="p-5">
-                <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2">
-                    {event.title || "Upcoming Taekwondo Event"}
-                </h3>
-
-                <div className="flex items-center mb-3">
-                    <div className="bg-red-50 text-red-700 text-xs px-2 py-1 rounded-full flex items-center">
+                <div className="flex flex-wrap gap-2 mb-4">
+                    <div className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full flex items-center">
                         <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1z" />
                         </svg>
-                        <span>{event.instructor.firstName + ' ' + event.instructor.lastName || 'Unknown instrcutor'}</span>
+                        <span className="font-medium">{event.instructor?.firstName + ' ' + event.instructor?.lastName || 'Unknown instructor'}</span>
+                    </div>
+
+                    <div className="bg-purple-50 text-purple-700 text-xs px-3 py-1 rounded-full flex items-center">
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z" />
+                        </svg>
+                        <span className="font-medium"><strong>{event.registrations && event.registrations.length ? event.registrations.length : 0}</strong> participants</span>
                     </div>
                 </div>
 
-                <div className="space-y-2 mb-4">
-                    <div className="flex items-center text-gray-600">
-                        <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <div className="space-y-3 mb-5">
+                    <div className="flex items-center text-gray-700">
+                        <svg className="w-5 h-5 flex-shrink-0 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                         </svg>
-                        <span className="ml-2 text-sm">
+                        <span className="ml-2 text-sm font-medium">
                             {event.location || "Kathmandu"}
                         </span>
                     </div>
 
-                    <div className="flex items-center text-gray-600">
-                        <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="flex items-center text-gray-700">
+                        <svg className="w-5 h-5 flex-shrink-0 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                         </svg>
-                        <span className="ml-2 text-sm">
+                        <span className="ml-2 text-sm font-medium">
                             {formatDate(event.eventDate)}
                             {event.endDate && (
                                 <> to {formatDate(event.endDate)}</>
                             )}
                         </span>
                     </div>
-
-                    <div className="flex items-center text-gray-600">
-                        <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v1h8v-1zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-1a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v1h-3zM4.75 12.094A5.973 5.973 0 004 15v1H1v-1a3 3 0 013.75-2.906z" />
-                        </svg>
-                        <span className="ml-2 text-sm">
-                            <strong>{event.registrations?.length || 0}</strong> participants registered
-                        </span>
-                    </div>
                 </div>
 
-                <div className="flex space-x-2">
+                <div className="flex space-x-3">
                     <button
-                        className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${registrationOpen
-                            ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500 text-white'
+                        className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 ${registrationOpen
+                            ? 'bg-lime-700 hover:bg-indigo-700 focus:ring-indigo-500 text-white shadow-md hover:shadow-lg'
                             : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                             }`}
                         disabled={!registrationOpen}
                         onClick={() => registrationOpen && onRegisterClick(event.eventId)}
                         aria-label={registrationOpen ? `Register for ${event.title || "event"}` : "Registration closed"}
                     >
-                        {registrationOpen ? "Register Now" : "Registration Closed"}
+                        {registrationOpen ? "Register" : "Closed"}
                     </button>
 
                     <button
-                        className="flex-1 py-2 px-4 rounded-lg text-sm font-medium bg-green-600 hover:bg-green-700 text-white transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                        onClick={() => onBuyTicketClick(event.eventId)}
+                        className={`flex-1 py-2.5 px-4 rounded-lg text-sm font-medium ${registrationOpen
+                            ? "bg-orange-400 hover:bg-teal-700 text-white cursor-pointer"
+                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                            } transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 shadow-md hover:shadow-lg`}
+                        onClick={() => registrationOpen && onBuyTicketClick(event.eventId)}
+                        disabled={!registrationOpen}
                         aria-label={`Buy ticket for ${event.title || "event"}`}
                     >
                         Buy Ticket
@@ -197,6 +109,7 @@ const EventCard = ({ event, onRegisterClick, onBuyTicketClick }) => {
         </div>
     );
 };
+
 const Sidebar = ({ filter, setFilter }) => (
     <div className="w-80 min-h-screen p-6 bg-gray-50 border-r border-gray-200 flex flex-col">
         <h2 className="text-xl font-bold text-gray-800 mb-6">Event Filters</h2>
@@ -302,12 +215,16 @@ const Events = () => {
         navigate(`/events/${eventId}/register`);
     };
 
+    const handleBuyTicketClick = (eventId) => {
+        navigate(`/events/${eventId}/tickets`);
+    };
+
     if (loading) {
         return (
             <div className="flex">
                 <Sidebar filter={filter} setFilter={setFilter} />
                 <div className="flex-grow p-6 flex items-center justify-center">
-                    <CircularProgress></CircularProgress>
+                    <CircularProgress />
                 </div>
             </div>
         );
@@ -334,6 +251,7 @@ const Events = () => {
                             key={event.eventId}
                             event={event}
                             onRegisterClick={handleRegisterClick}
+                            onBuyTicketClick={handleBuyTicketClick}
                         />
                     ))}
                 </div>

@@ -351,10 +351,10 @@ const Profile = () => {
 
                     <Box display="flex" flexDirection="column" gap={1}>
                         {[
-                            { icon: <PeopleIcon />, text: "Friends" },
-                            { icon: <GroupIcon />, text: "Groups" },
-                            { icon: <VideoLibraryIcon />, text: "Watch" },
-                            { icon: <EventIcon />, text: "Events" },
+                            // { icon: <PeopleIcon />, text: "Friends" },
+                            // { icon: <GroupIcon />, text: "Groups" },
+                            // { icon: <VideoLibraryIcon />, text: "Watch" },
+                            { icon: <EventIcon />, text: "Events", onClick: function () { navigate('/events') } },
                             { icon: <ChatIcon />, text: "Chat" },
                             {
                                 icon: <ExitToAppIcon />,

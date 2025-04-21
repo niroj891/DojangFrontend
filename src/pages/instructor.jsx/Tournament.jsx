@@ -30,8 +30,8 @@ const TournamentManager = () => {
 
                 // Sort events by creation date (newest first)
                 const sortedEvents = [...response.data].sort((a, b) => {
-                    const dateA = new Date(a.createdAt || a.startDate || a.date || Date.now());
-                    const dateB = new Date(b.createdAt || b.startDate || b.date || Date.now());
+                    const dateA = new Date(a.eventDate || a.startDate || a.date || Date.now());
+                    const dateB = new Date(b.eventDate || b.startDate || b.date || Date.now());
                     return dateB - dateA;
                 });
 
@@ -164,10 +164,12 @@ const TournamentManager = () => {
             ]);
             setParticipants(participantsRes.data);
             setCurrentMatchResult(matchResultsRes.data);
+
+
             setCurrentMatch(null);
 
             // Check for tournament completion
-            const remainingParticipants = participantsResponse.data.filter(
+            const remainingParticipants = participantsRes.data.filter(
                 p => p.weightCategory === selectedWeightCategory && p.playerStatus === 'NOTOUT'
             );
             if (remainingParticipants.length === 1) {
@@ -260,15 +262,35 @@ const TournamentManager = () => {
         return remaining.length === 1 ? remaining[0] : null;
     };
 
+    // Handle back button click
+    const handleBackToEvents = () => {
+        setSelectedEvent(null);
+        setSelectedWeightCategory(null);
+        setCurrentMatch(null);
+        setError(null);
+        setSuccess(null);
+    };
+
     return (
         <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
             <div className="container mx-auto px-4 py-8">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold text-gray-800">Tournament Sparring Manager</h1>
                     {selectedEvent && (
-                        <div className="flex items-center">
-                            <span className="text-sm font-medium text-gray-600 mr-2">Selected Event:</span>
-                            <span className="text-base font-semibold text-blue-600">{selectedEvent.title}</span>
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={handleBackToEvents}
+                                className="flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors duration-200"
+                            >
+                                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                                </svg>
+                                Back to Events
+                            </button>
+                            <div className="flex items-center">
+                                <span className="text-sm font-medium text-gray-600 mr-2">Selected Event:</span>
+                                <span className="text-base font-semibold text-blue-600">{selectedEvent.title}</span>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -310,30 +332,58 @@ const TournamentManager = () => {
                         <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Select Tournament Event</h2>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                             {events.map(event => (
-                                <div key={event.eventId} className="group">
-                                    <div className="relative rounded-xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1">
-                                        <div className="h-48 bg-gray-200 overflow-hidden">
+                                <div
+                                    key={event.eventId}
+                                    className="group cursor-pointer"
+                                    onClick={() => {
+                                        setSelectedEvent(event);
+                                        setSelectedWeightCategory(null);
+                                        setCurrentMatch(null);
+                                    }}
+                                >
+                                    <div className="relative rounded-xl overflow-hidden transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-1 h-full flex flex-col">
+                                        <div className="h-48 bg-gray-200 overflow-hidden relative">
                                             <img
                                                 className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                                 src={`http://localhost:9696/files/images/event/${event.imageUrl}`}
                                                 alt={event.title}
-                                            />
-                                        </div>
-                                        <div className="p-5 bg-white">
-                                            <h3 className="text-xl font-bold mb-2 text-gray-800">{event.title}</h3>
-                                            <button
-                                                className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
-                                                onClick={() => {
-                                                    setSelectedEvent(event);
-                                                    setSelectedWeightCategory(null);
-                                                    setCurrentMatch(null);
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "https://via.placeholder.com/300x200?text=Event+Image";
                                                 }}
-                                            >
-                                                <span>Select Event</span>
-                                                <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                                </svg>
-                                            </button>
+                                            />
+                                            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+                                                <h3 className="text-xl font-bold text-white">{event.title}</h3>
+                                            </div>
+                                        </div>
+                                        <div className="p-5 bg-white flex-grow flex flex-col">
+                                            <div className="mb-4">
+                                                <p className="text-gray-600 line-clamp-2">{event.description || 'No description available'}</p>
+                                            </div>
+                                            <div className="mt-auto">
+                                                <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+                                                    <span>
+                                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                        {new Date(event.eventDate).toLocaleDateString()}
+                                                    </span>
+                                                    <span>
+                                                        <svg className="w-4 h-4 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                        </svg>
+                                                        {event.registrations.length || 0} participants
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center"
+                                                >
+                                                    <span>Select Event</span>
+                                                    <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                                    </svg>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
